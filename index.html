@@ -145,33 +145,78 @@
       box-shadow: 0 4px 14px rgba(0,0,0,0.3);
     }
     .hitem.special { border-left-color: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.12); }
-    .hitem.brother { border-left-color: #f0c14a; }
-    .hitem.twopair { border-left-color: #34d399; }
+    .hitem.royalflush { border-left-color: #d946ef; box-shadow: 0 0 14px rgba(217,70,239,0.25); }
+    .hitem.straightflush { border-left-color: #f43f5e; box-shadow: 0 0 12px rgba(244,63,94,0.2); }
     .hitem.fullhouse { border-left-color: #fb923c; }
-    .hitem.pair { border-left-color: #60a5fa; }
+    .hitem.brother { border-left-color: #f0c14a; }
     .hitem.trips { border-left-color: #a78bfa; }
+    .hitem.straight { border-left-color: #34d399; }
+    .hitem.flush { border-left-color: #f472b6; }
+    .hitem.twopair { border-left-color: #38bdf8; }
+    .hitem.pair { border-left-color: #60a5fa; }
     .hname { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.72rem; font-weight: 600; }
     .hname .tag { font-size: 0.52rem; padding: 2px 5px; border-radius: 3px; font-weight: 600; }
     .tag.bomb { background: rgba(239,68,68,0.22); color: #fca5a5; }
-    .tag.brother { background: rgba(240,193,74,0.18); color: #fcd34d; }
-    .tag.twopair { background: rgba(52,211,153,0.15); color: #6ee7b7; }
+    .tag.royalflush { background: rgba(217,70,239,0.22); color: #f0abfc; font-weight: 700; }
+    .tag.straightflush { background: rgba(244,63,94,0.2); color: #fda4af; }
     .tag.fullhouse { background: rgba(251,146,60,0.18); color: #fdba74; }
-    .tag.pair { background: rgba(96,165,250,0.18); color: #93c5fd; }
+    .tag.brother { background: rgba(240,193,74,0.18); color: #fcd34d; }
     .tag.trips { background: rgba(167,139,250,0.2); color: #c4b5fd; }
     .tag.straight { background: rgba(52,211,153,0.15); color: #6ee7b7; }
     .tag.flush { background: rgba(244,114,182,0.15); color: #f9a8d4; }
-    /* Room settings toggle */
-    .room-settings { margin: 6px 0 2px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
-    .room-settings legend { font-size: 0.7rem; font-weight: 700; color: #9fb0c7; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 4px; }
-    .rs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
-    .rs-label { font-size: 0.78rem; color: #c9d8e8; }
-    .rs-label small { display: block; font-size: 0.63rem; color: #64748b; margin-top: 1px; }
-    .rs-toggle { position: relative; width: 36px; height: 20px; }
-    .rs-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-    .rs-track { position: absolute; inset: 0; border-radius: 20px; background: #334155; transition: background 0.2s; cursor: pointer; }
-    .rs-track::after { content: ''; position: absolute; left: 3px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
-    .rs-toggle input:checked + .rs-track { background: #22c55e; }
-    .rs-toggle input:checked + .rs-track::after { transform: translateX(16px); }
+    .tag.twopair { background: rgba(56,189,248,0.18); color: #7dd3fc; }
+    .tag.pair { background: rgba(96,165,250,0.18); color: #93c5fd; }
+
+    /* Room settings in lobby */
+    .room-settings {
+      margin: 8px 0 4px; padding: 12px 14px; border-radius: 14px;
+      background: rgba(14,20,32,0.85); border: 1px solid var(--glass-border);
+      display: flex; flex-direction: column; gap: 8px; text-align: left;
+    }
+    .rs-title {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.75rem; font-weight: 700; color: #cbd5e1; letter-spacing: 0.04em;
+    }
+    .rs-tag {
+      font-size: 0.62rem; padding: 2px 7px; border-radius: 999px;
+      background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3);
+      font-weight: 700;
+    }
+    .rs-tag.off {
+      background: rgba(251,146,60,0.15); color: #fb923c; border-color: rgba(251,146,60,0.3);
+    }
+    .rs-choices {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .rs-choice-card {
+      display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px;
+      border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.18s;
+    }
+    .rs-choice-card:hover {
+      background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18);
+    }
+    .rs-choice-card.selected {
+      background: rgba(240,193,74,0.08); border-color: rgba(240,193,74,0.4);
+      box-shadow: 0 0 12px rgba(240,193,74,0.12);
+    }
+    .rs-choice-card input[type="radio"] {
+      margin-top: 3px; accent-color: var(--gold); cursor: pointer;
+    }
+    .rs-choice-body {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .rs-choice-head {
+      display: flex; align-items: center; gap: 6px; font-size: 0.76rem; font-weight: 700; color: #e2e8f0;
+    }
+    .rs-choice-desc {
+      font-size: 0.66rem; color: #94a3b8; line-height: 1.35;
+    }
+    .rule-pill {
+      font-size: 0.62rem; font-weight: 700; padding: 1px 6px; border-radius: 999px;
+      background: rgba(240,193,74,0.15); color: #fcd34d; border: 1px solid rgba(240,193,74,0.3);
+      display: inline-block; margin-left: 6px; vertical-align: middle;
+    }
     .hcards { display: flex; gap: 2px; flex-wrap: wrap; }
     .mc {
       width: 22px; height: 30px; background: #fff; border-radius: 2px;
@@ -523,11 +568,15 @@
     .hitem:hover, .hitem:active { background: var(--glass), rgba(20,28,44,0.55); transform: translateX(-5px) scale(1.02); box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 18px rgba(255,255,255,0.06); }
     .hitem:hover::before { transform: translateX(110%); }
     .hitem.special:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(239,68,68,0.3); }
-    .hitem.brother:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(240,193,74,0.28); }
-    .hitem.twopair:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(52,211,153,0.28); }
+    .hitem.royalflush:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 24px rgba(217,70,239,0.4); }
+    .hitem.straightflush:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(244,63,94,0.35); }
     .hitem.fullhouse:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(251,146,60,0.28); }
-    .hitem.pair:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(96,165,250,0.28); }
+    .hitem.brother:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(240,193,74,0.28); }
     .hitem.trips:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(167,139,250,0.3); }
+    .hitem.straight:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(52,211,153,0.28); }
+    .hitem.flush:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(244,114,182,0.28); }
+    .hitem.twopair:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(56,189,248,0.28); }
+    .hitem.pair:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(96,165,250,0.28); }
     .hitem:active { transform: translateX(-2px) scale(0.98); }
     .mc { transition: transform 0.2s var(--ease-pop); }
     .hitem:hover .mc { transform: translateY(-2px); }
@@ -1085,19 +1134,34 @@
         <p class="m-hint" id="linkHint" hidden>This file is opened from your computer, so the link only works here. Host the page online so friends can open it. The room code works the same once they do.</p>
         <div class="m-label">Players <span id="lobCount"></span></div>
         <ul class="plist" id="lobList"></ul>
-        <fieldset class="room-settings" id="roomSettings" hidden>
-          <legend>⚙️ Room Rules</legend>
-          <div class="rs-row">
-            <label class="rs-label" for="togSuitRank">
-              Suit matters for ranking
-              <small>♠ beats ♥ of same number</small>
+        <div class="room-settings" id="roomSettings">
+          <div class="rs-title">
+            <span>⚙️ Card Ranking Rule</span>
+            <span class="rs-tag" id="rsTag">♠ Suit Ranking ON</span>
+          </div>
+          <div class="rs-choices">
+            <label class="rs-choice-card selected" id="lblRuleSuit">
+              <input type="radio" name="ruleSuitChoice" id="optRuleSuit" value="suit" checked>
+              <div class="rs-choice-body">
+                <div class="rs-choice-head">
+                  <span style="color:#fcd34d;">♠</span>
+                  <b>Symbol Ranking Matters</b>
+                </div>
+                <div class="rs-choice-desc">Equal numbers fight by suit: ♠ > ♥ > ♣ > ♦ (e.g. 8♠ beats 8♥)</div>
+              </div>
             </label>
-            <label class="rs-toggle">
-              <input type="checkbox" id="togSuitRank" checked>
-              <span class="rs-track"></span>
+            <label class="rs-choice-card" id="lblRuleNumber">
+              <input type="radio" name="ruleSuitChoice" id="optRuleNumber" value="number">
+              <div class="rs-choice-body">
+                <div class="rs-choice-head">
+                  <span style="color:#38bdf8;">🔢</span>
+                  <b>Only Number</b>
+                </div>
+                <div class="rs-choice-desc">8 cannot fight 8, needs 9+ regardless of symbol</div>
+              </div>
             </label>
           </div>
-        </fieldset>
+        </div>
         <button class="m-btn primary" id="btnStart">Start game</button>
         <p class="m-wait" id="lobWait"></p>
         <button class="m-link" id="btnLeaveLobby">Leave room</button>
@@ -1146,14 +1210,12 @@
     }
     function dealHands(count) {
       const deck = shuffle(buildDeck());
-      // Distribute ALL 52 cards — some players may get 1 extra card
-      return Array.from({ length: count }, (_, i) => {
-        const base = Math.floor(deck.length / count);
-        const extra = deck.length % count;
-        const start = i * base + Math.min(i, extra);
-        const end = start + base + (i < extra ? 1 : 0);
-        return sortHand(deck.slice(start, end));
+      if (count === 1) return [sortHand(deck.slice(0, 13))];
+      const hands = Array.from({ length: count }, () => []);
+      deck.forEach((card, idx) => {
+        hands[idx % count].push(card);
       });
+      return hands.map(h => sortHand(h));
     }
 
     function createLargeCard(code) {
@@ -1184,81 +1246,293 @@
       parsed.forEach(c => { if (!byRank[c.rank]) byRank[c.rank] = []; byRank[c.rank].push(c); });
       const ranks = Object.keys(byRank);
       const counts = ranks.map(r => byRank[r].length).sort((a,b) => b-a);
+
       if (codes.length === 1) return 'single';
       if (codes.length === 2 && ranks.length === 1) return 'pair';
       if (codes.length === 3 && ranks.length === 1) return 'trips';
       if (codes.length === 4 && ranks.length === 1) return 'bomb';
+
       if (codes.length === 4 && ranks.length === 2 && counts[0] === 2 && counts[1] === 2) {
         const sorted = ranks.slice().sort((a,b) => rankValue(a)-rankValue(b));
-        // Brother: exactly consecutive non-2 ranks
+        // Brother: exactly consecutive non-2 ranks (e.g. 5566, 991010)
         if (rankValue(sorted[1])-rankValue(sorted[0]) === 1 && !sorted.includes('2')) return 'brother';
-        // Two Pair: any two pairs (non-consecutive or consecutive)
+        // Two Pair: any other two pairs (e.g. 5577, 9944, 2244)
         return 'twopair';
       }
+
       if (codes.length === 5) {
         // Full House: 3+2
-        if (ranks.length === 2 && (counts[0] === 3 && counts[1] === 2)) return 'fullhouse';
+        if (ranks.length === 2 && counts[0] === 3 && counts[1] === 2) return 'fullhouse';
+
+        const isSameSuit = parsed.every(c => c.suit === parsed[0].suit);
         const unique = [...new Set(parsed.map(c => c.rank))];
+        let isConsecutive = false;
+        let sortedUnique = [];
+
         if (unique.length === 5 && !unique.includes('2')) {
-          unique.sort((a,b) => rankValue(a)-rankValue(b));
-          let ok = true;
-          for (let i = 1; i < 5; i++) if (rankValue(unique[i])-rankValue(unique[i-1]) !== 1) { ok = false; break; }
-          if (ok) return 'straight';
+          sortedUnique = unique.slice().sort((a,b) => rankValue(a) - rankValue(b));
+          isConsecutive = true;
+          for (let i = 1; i < 5; i++) {
+            if (rankValue(sortedUnique[i]) - rankValue(sortedUnique[i-1]) !== 1) {
+              isConsecutive = false;
+              break;
+            }
+          }
         }
-        if (parsed.every(c => c.suit === parsed[0].suit)) return 'flush';
+
+        if (isSameSuit && isConsecutive) {
+          if (sortedUnique[0] === '10' && sortedUnique[4] === 'A') return 'royalflush';
+          return 'straightflush';
+        }
+        if (isConsecutive) return 'straight';
+        if (isSameSuit) return 'flush';
       }
+
       return null;
+    }
+
+    const FIVE_CARD_ORDER = {
+      straight: 1,
+      flush: 2,
+      fullhouse: 3,
+      straightflush: 4,
+      royalflush: 5
+    };
+
+    function formatComboName(type) {
+      const names = {
+        single: 'Single',
+        pair: 'Pair',
+        trips: 'Trips',
+        twopair: 'Two Pair',
+        brother: 'Brother',
+        bomb: 'Bomb',
+        straight: 'Straight',
+        flush: 'Flush',
+        fullhouse: 'Full House',
+        straightflush: 'Straight Flush',
+        royalflush: 'Royal Flush'
+      };
+      return names[type] || type;
+    }
+
+    function getTwoPairRanks(codes) {
+      const byR = {};
+      codes.forEach(c => { const r = parseCard(c).rank; byR[r] = (byR[r] || 0) + 1; });
+      const pairRanks = Object.keys(byR).sort((a,b) => rankValue(a) - rankValue(b));
+      const highRank = pairRanks[pairRanks.length - 1];
+      const lowRank = pairRanks[0];
+      return {
+        lowRank,
+        highRank,
+        highRankVal: rankValue(highRank),
+        lowRankVal: rankValue(lowRank),
+        highCards: codes.filter(c => parseCard(c).rank === highRank)
+      };
+    }
+
+    function getFullHouseTripsRank(codes) {
+      const byR = {};
+      codes.forEach(c => { const r = parseCard(c).rank; byR[r] = (byR[r] || 0) + 1; });
+      const tr = Object.keys(byR).find(r => byR[r] === 3);
+      return rankValue(tr);
     }
 
     function canBeat(newCodes) {
       const newType = detectType(newCodes);
       if (!newType) return { ok: false, reason: 'Invalid set' };
-      if (newType === 'bomb') {
-        if (playedType === 'single' && playedCards.length === 1 && parseCard(playedCards[0]).rank === '2')
-          return { ok: true, isBombEnd: true };
-        return { ok: false, reason: 'Bomb only beats a single 2' };
-      }
+
+      // Table is empty: lead any valid hand
       if (playedCards.length === 0) return { ok: true };
-      if (playedType === 'single' && newType !== 'single')
-        return { ok: false, reason: 'Only single can beat a single (or Bomb on 2)' };
-      if (playedType === 'pair' && newType !== 'pair')
-        return { ok: false, reason: 'Only Pair can beat a Pair' };
-      if (playedType === 'trips' && newType !== 'trips')
-        return { ok: false, reason: 'Only Trips can beat Trips' };
-      if (playedType === 'brother' && newType !== 'brother')
-        return { ok: false, reason: 'Only Brother can beat Brother' };
-      if (playedType === 'twopair' && newType !== 'twopair')
-        return { ok: false, reason: 'Only Two Pair can beat Two Pair' };
-      if (playedType === 'fullhouse' && newType !== 'fullhouse')
-        return { ok: false, reason: 'Only Full House can beat Full House' };
-      if ((playedType === 'straight' || playedType === 'flush') && newType !== playedType)
-        return { ok: false, reason: `Only ${playedType} can beat this` };
-      if (playedType === 'bomb')
-        return { ok: false, reason: 'Bomb already ended the match' };
 
-      // Strength comparison
-      const suitBonus = suitRankingEnabled ? 1 : 0;
-      const strength = c => { const k = parseCard(c); return rankValue(k.rank) * 10 + SUIT_PRIORITY[k.suit] * suitBonus; };
-
-      if (newType === 'fullhouse' || newType === 'twopair') {
-        // Compare by the dominant group (trips rank for fullhouse, higher pair for twopair)
-        const dominantRank = (codes) => {
-          const p = codes.map(parseCard);
-          const br = {};
-          p.forEach(c => { br[c.rank] = (br[c.rank] || 0) + 1; });
-          const target = newType === 'fullhouse' ? 3 : 2;
-          const dominant = Object.entries(br).filter(([,v]) => v === target).map(([k]) => k).sort((a,b) => rankValue(b)-rankValue(a))[0];
-          // Best card of dominant rank
-          return Math.max(...codes.filter(c => parseCard(c).rank === dominant).map(c => strength(c)));
-        };
-        if (dominantRank(newCodes) <= dominantRank(playedCards)) return { ok: false, reason: 'Must be higher than current played' };
-        return { ok: true };
+      // Bomb rules
+      if (newType === 'bomb') {
+        if (playedType === 'single' && playedCards.length === 1 && parseCard(playedCards[0]).rank === '2') {
+          return { ok: true, isBombEnd: true };
+        }
+        if (playedType === 'bomb') {
+          const newR = rankValue(parseCard(newCodes[0]).rank);
+          const playedR = rankValue(parseCard(playedCards[0]).rank);
+          if (newR > playedR) return { ok: true, isBombEnd: true };
+          return { ok: false, reason: 'Bomb must be higher rank than current Bomb' };
+        }
+        return { ok: false, reason: 'Bomb only beats a single 2 or a lower Bomb' };
+      }
+      if (playedType === 'bomb') {
+        return { ok: false, reason: 'Only a higher Bomb can beat a Bomb' };
       }
 
-      const newMax = Math.max(...newCodes.map(strength));
-      const playedMax = Math.max(...playedCards.map(strength));
-      if (newMax <= playedMax) return { ok: false, reason: 'Must be higher than current played' };
-      return { ok: true };
+      // Single
+      if (playedType === 'single') {
+        if (newType !== 'single') return { ok: false, reason: 'Only single can beat a single (or Bomb on 2)' };
+        const newC = parseCard(newCodes[0]);
+        const playedC = parseCard(playedCards[0]);
+        const newR = rankValue(newC.rank);
+        const playedR = rankValue(playedC.rank);
+        if (newR > playedR) return { ok: true };
+        if (newR < playedR) return { ok: false, reason: 'Must be higher number than current played' };
+        if (suitRankingEnabled) {
+          if (SUIT_PRIORITY[newC.suit] > SUIT_PRIORITY[playedC.suit]) return { ok: true };
+          return { ok: false, reason: 'Must have higher suit (♠ > ♥ > ♣ > ♦)' };
+        } else {
+          return { ok: false, reason: `Number only: ${playedC.rank} cannot fight ${playedC.rank}, needs higher number` };
+        }
+      }
+
+      // Pair
+      if (playedType === 'pair') {
+        if (newType !== 'pair') return { ok: false, reason: 'Only Pair can beat a Pair' };
+        const newR = rankValue(parseCard(newCodes[0]).rank);
+        const playedR = rankValue(parseCard(playedCards[0]).rank);
+        if (newR > playedR) return { ok: true };
+        if (newR < playedR) return { ok: false, reason: 'Must be higher rank than current played' };
+        if (suitRankingEnabled) {
+          const topSuitNew = Math.max(...newCodes.map(c => SUIT_PRIORITY[parseCard(c).suit]));
+          const topSuitPlayed = Math.max(...playedCards.map(c => SUIT_PRIORITY[parseCard(c).suit]));
+          if (topSuitNew > topSuitPlayed) return { ok: true };
+          return { ok: false, reason: 'Must have higher suit (♠ > ♥ > ♣ > ♦)' };
+        } else {
+          return { ok: false, reason: `Number only: Pair of ${parseCard(playedCards[0]).rank} cannot fight Pair of ${parseCard(playedCards[0]).rank}, needs higher number` };
+        }
+      }
+
+      // Trips
+      if (playedType === 'trips') {
+        if (newType !== 'trips') return { ok: false, reason: 'Only Trips can beat Trips' };
+        const newR = rankValue(parseCard(newCodes[0]).rank);
+        const playedR = rankValue(parseCard(playedCards[0]).rank);
+        if (newR > playedR) return { ok: true };
+        return { ok: false, reason: 'Must be higher rank than current played' };
+      }
+
+      // 4-card sets: Two Pair & Brother
+      // "two pair can be beater by higher twopair or brother but brother cant be beaten by twopair"
+      if (playedType === 'twopair') {
+        if (newType === 'brother') {
+          return { ok: true }; // Any Brother beats Two Pair!
+        }
+        if (newType !== 'twopair') {
+          return { ok: false, reason: 'Only higher Two Pair or Brother can beat Two Pair' };
+        }
+        const infoNew = getTwoPairRanks(newCodes);
+        const infoPlayed = getTwoPairRanks(playedCards);
+        if (infoNew.highRankVal > infoPlayed.highRankVal) return { ok: true };
+        if (infoNew.highRankVal < infoPlayed.highRankVal) return { ok: false, reason: 'Higher pair must be higher rank' };
+        if (suitRankingEnabled) {
+          const topSuitNew = Math.max(...infoNew.highCards.map(c => SUIT_PRIORITY[parseCard(c).suit]));
+          const topSuitPlayed = Math.max(...infoPlayed.highCards.map(c => SUIT_PRIORITY[parseCard(c).suit]));
+          if (topSuitNew > topSuitPlayed) return { ok: true };
+          return { ok: false, reason: 'Must have higher suit on highest pair' };
+        } else {
+          if (infoNew.lowRankVal > infoPlayed.lowRankVal) return { ok: true };
+          return { ok: false, reason: `Number only: Two Pair with ${infoPlayed.highRank} cannot beat equal Two Pair, needs higher number` };
+        }
+      }
+
+      if (playedType === 'brother') {
+        if (newType === 'twopair') {
+          return { ok: false, reason: 'Two Pair cannot beat Brother (Brother ranks higher)' };
+        }
+        if (newType !== 'brother') {
+          return { ok: false, reason: 'Only Brother can beat Brother' };
+        }
+        const infoNew = getTwoPairRanks(newCodes);
+        const infoPlayed = getTwoPairRanks(playedCards);
+        if (infoNew.highRankVal > infoPlayed.highRankVal) return { ok: true };
+        if (infoNew.highRankVal < infoPlayed.highRankVal) return { ok: false, reason: 'Must be a higher Brother' };
+        if (suitRankingEnabled) {
+          const topSuitNew = Math.max(...infoNew.highCards.map(c => SUIT_PRIORITY[parseCard(c).suit]));
+          const topSuitPlayed = Math.max(...infoPlayed.highCards.map(c => SUIT_PRIORITY[parseCard(c).suit]));
+          if (topSuitNew > topSuitPlayed) return { ok: true };
+          return { ok: false, reason: 'Must have higher suit on highest pair' };
+        } else {
+          return { ok: false, reason: 'Number only: Brother cannot beat equal Brother' };
+        }
+      }
+
+      // 5-card sets:
+      // "straight -> flush -> fullhouse -> straight flush -> royalflush"
+      if (FIVE_CARD_ORDER[playedType]) {
+        if (!FIVE_CARD_ORDER[newType]) {
+          return { ok: false, reason: 'Only a 5-card set can beat this 5-card set' };
+        }
+        const rankNew = FIVE_CARD_ORDER[newType];
+        const rankPlayed = FIVE_CARD_ORDER[playedType];
+        if (rankNew > rankPlayed) return { ok: true };
+        if (rankNew < rankPlayed) return { ok: false, reason: `${formatComboName(newType)} cannot beat ${formatComboName(playedType)}` };
+
+        // Same 5-card set category
+        if (newType === 'fullhouse') {
+          const trNew = getFullHouseTripsRank(newCodes);
+          const trPlayed = getFullHouseTripsRank(playedCards);
+          if (trNew > trPlayed) return { ok: true };
+          return { ok: false, reason: 'Full House must have higher trips rank' };
+        }
+
+        if (newType === 'straight') {
+          const maxNew = Math.max(...newCodes.map(c => rankValue(parseCard(c).rank)));
+          const maxPlayed = Math.max(...playedCards.map(c => rankValue(parseCard(c).rank)));
+          if (maxNew > maxPlayed) return { ok: true };
+          if (maxNew < maxPlayed) return { ok: false, reason: 'Must be higher Straight' };
+          if (suitRankingEnabled) {
+            const suitNew = Math.max(...newCodes.filter(c => rankValue(parseCard(c).rank) === maxNew).map(c => SUIT_PRIORITY[parseCard(c).suit]));
+            const suitPlayed = Math.max(...playedCards.filter(c => rankValue(parseCard(c).rank) === maxPlayed).map(c => SUIT_PRIORITY[parseCard(c).suit]));
+            if (suitNew > suitPlayed) return { ok: true };
+            return { ok: false, reason: 'Must have higher suit on highest card' };
+          } else {
+            return { ok: false, reason: 'Number only: Straight cannot beat equal Straight' };
+          }
+        }
+
+        if (newType === 'flush') {
+          if (suitRankingEnabled) {
+            const suitNew = SUIT_PRIORITY[parseCard(newCodes[0]).suit];
+            const suitPlayed = SUIT_PRIORITY[parseCard(playedCards[0]).suit];
+            if (suitNew > suitPlayed) return { ok: true };
+            if (suitNew < suitPlayed) return { ok: false, reason: 'Must be higher suit Flush (♠ > ♥ > ♣ > ♦)' };
+            const rNew = Math.max(...newCodes.map(c => rankValue(parseCard(c).rank)));
+            const rPlayed = Math.max(...playedCards.map(c => rankValue(parseCard(c).rank)));
+            if (rNew > rPlayed) return { ok: true };
+            return { ok: false, reason: 'Must have higher card in Flush' };
+          } else {
+            const ranksNew = newCodes.map(c => rankValue(parseCard(c).rank)).sort((a,b) => b-a);
+            const ranksPlayed = playedCards.map(c => rankValue(parseCard(c).rank)).sort((a,b) => b-a);
+            for (let i = 0; i < ranksNew.length; i++) {
+              if (ranksNew[i] > ranksPlayed[i]) return { ok: true };
+              if (ranksNew[i] < ranksPlayed[i]) return { ok: false, reason: 'Must have higher rank card in Flush' };
+            }
+            return { ok: false, reason: 'Number only: cannot beat equal Flush' };
+          }
+        }
+
+        if (newType === 'straightflush') {
+          const maxNew = Math.max(...newCodes.map(c => rankValue(parseCard(c).rank)));
+          const maxPlayed = Math.max(...playedCards.map(c => rankValue(parseCard(c).rank)));
+          if (maxNew > maxPlayed) return { ok: true };
+          if (maxNew < maxPlayed) return { ok: false, reason: 'Must be higher Straight Flush' };
+          if (suitRankingEnabled) {
+            const suitNew = SUIT_PRIORITY[parseCard(newCodes[0]).suit];
+            const suitPlayed = SUIT_PRIORITY[parseCard(playedCards[0]).suit];
+            if (suitNew > suitPlayed) return { ok: true };
+            return { ok: false, reason: 'Must have higher suit Straight Flush' };
+          } else {
+            return { ok: false, reason: 'Number only: cannot fight equal Straight Flush' };
+          }
+        }
+
+        if (newType === 'royalflush') {
+          if (suitRankingEnabled) {
+            const suitNew = SUIT_PRIORITY[parseCard(newCodes[0]).suit];
+            const suitPlayed = SUIT_PRIORITY[parseCard(playedCards[0]).suit];
+            if (suitNew > suitPlayed) return { ok: true };
+            return { ok: false, reason: 'Must have higher suit Royal Flush (♠ > ♥ > ♣ > ♦)' };
+          } else {
+            return { ok: false, reason: 'Number only: Royal Flush cannot beat Royal Flush' };
+          }
+        }
+      }
+
+      return { ok: false, reason: 'Invalid move' };
     }
 
     function hasLegalMove() {
@@ -1277,29 +1551,71 @@
       const sets = [];
       const rankIdx = r => RANK_ORDER.indexOf(r);
 
-      // Bomb (4-of-a-kind)
+      // 1. Bomb (4-of-a-kind)
       Object.entries(byRank).forEach(([rank, list]) => {
         if (list.length >= 4) sets.push({ type:'Bomb', tag:'bomb', className:'special', cards:list.slice(0,4).map(c=>c.code), label:`Bomb ${rank}` });
       });
 
-      // Full House (3+2) — trips rank is dominant
+      // 2. Royal Flush & Straight Flush (per suit)
+      Object.entries(bySuit).forEach(([suit, list]) => {
+        // Royal Flush
+        const royalRanks = ['10', 'J', 'Q', 'K', 'A'];
+        if (royalRanks.every(r => list.some(c => c.rank === r))) {
+          const royalCards = royalRanks.map(r => list.find(c => c.rank === r).code);
+          sets.push({
+            type: 'RoyalFlush',
+            tag: 'royalflush',
+            className: 'royalflush',
+            cards: royalCards,
+            label: `Royal Flush ${suits[suit].symbol}`
+          });
+        }
+
+        // Straight Flush
+        const suitRanks = [...new Set(list.map(c => c.rank).filter(r => r !== '2'))]
+          .sort((a,b) => rankIdx(a) - rankIdx(b));
+        for (let i = 0; i <= suitRanks.length - 5; i++) {
+          const slice = suitRanks.slice(i, i + 5);
+          let ok = true;
+          for (let j = 1; j < 5; j++) {
+            if (rankIdx(slice[j]) - rankIdx(slice[j-1]) !== 1) { ok = false; break; }
+          }
+          if (ok) {
+            if (slice[0] === '10' && slice[4] === 'A') continue; // Handled by Royal Flush
+            const sfCards = slice.map(r => list.find(c => c.rank === r).code);
+            sets.push({
+              type: 'StraightFlush',
+              tag: 'straightflush',
+              className: 'straightflush',
+              cards: sfCards,
+              label: `Str Flush ${slice[0]}-${slice[4]} ${suits[suit].symbol}`
+            });
+          }
+        }
+      });
+
+      // 3. Full House (3+2) — trips rank is dominant
       const tripRanks = Object.entries(byRank).filter(([,l]) => l.length >= 3).map(([r]) => r);
       const pairRanksForFH = Object.entries(byRank).filter(([,l]) => l.length >= 2).map(([r]) => r);
       tripRanks.forEach(tr => {
         pairRanksForFH.forEach(pr => {
           if (pr === tr) return;
-          sets.push({ type:'FullHouse', tag:'fullhouse', className:'fullhouse',
-            cards:[...byRank[tr].slice(0,3).map(c=>c.code), ...byRank[pr].slice(0,2).map(c=>c.code)],
-            label:`Full House ${tr}s over ${pr}s` });
+          sets.push({
+            type: 'FullHouse',
+            tag: 'fullhouse',
+            className: 'fullhouse',
+            cards: [...byRank[tr].slice(0,3).map(c=>c.code), ...byRank[pr].slice(0,2).map(c=>c.code)],
+            label: `Full House ${tr}s/${pr}s`
+          });
         });
       });
 
-      // Trips
+      // 4. Trips
       Object.entries(byRank).forEach(([rank, list]) => {
         if (list.length >= 3) sets.push({ type:'Trips', tag:'trips', className:'trips', cards:list.slice(0,3).map(c=>c.code), label:`Trips ${rank}` });
       });
 
-      // Build pair ranks list
+      // Pair ranks list
       const pairRanks = [];
       Object.entries(byRank).forEach(([rank, list]) => {
         if (list.length >= 2) {
@@ -1309,48 +1625,66 @@
       });
       pairRanks.sort((a,b) => rankIdx(a)-rankIdx(b));
 
-      // Brother: consecutive non-2 pair ranks
+      // 5. Brother: consecutive non-2 pair ranks
       for (let i = 0; i < pairRanks.length-1; i++) {
         const r1 = pairRanks[i], r2 = pairRanks[i+1];
         if (rankIdx(r2)-rankIdx(r1) === 1 && r2 !== '2') {
-          sets.push({ type:'Brother', tag:'brother', className:'brother',
-            cards:[...byRank[r1].slice(0,2).map(c=>c.code), ...byRank[r2].slice(0,2).map(c=>c.code)],
-            label:`Brother ${r1}${r2}` });
+          sets.push({
+            type: 'Brother',
+            tag: 'brother',
+            className: 'brother',
+            cards: [...byRank[r1].slice(0,2).map(c=>c.code), ...byRank[r2].slice(0,2).map(c=>c.code)],
+            label: `Brother ${r1}${r2}`
+          });
         }
       }
 
-      // Two Pair: any two different pair ranks (non-consecutive — Brother already covers consecutive)
-      for (let i = 0; i < pairRanks.length; i++) {
-        for (let j = i + 1; j < pairRanks.length; j++) {
-          const r1 = pairRanks[i], r2 = pairRanks[j];
-          // Skip if consecutive non-2 (those are already Brother)
-          if (rankIdx(r2)-rankIdx(r1) === 1 && r2 !== '2') continue;
-          sets.push({ type:'TwoPair', tag:'twopair', className:'twopair',
-            cards:[...byRank[r1].slice(0,2).map(c=>c.code), ...byRank[r2].slice(0,2).map(c=>c.code)],
-            label:`Two Pair ${r1}+${r2}` });
-        }
-      }
-
-      // Straight
+      // 6. Straight
       const uniqueRanks = [...new Set(parsed.map(c => c.rank).filter(r => r !== '2'))].sort((a,b)=>rankIdx(a)-rankIdx(b));
       for (let i = 0; i <= uniqueRanks.length-5; i++) {
         const slice = uniqueRanks.slice(i, i+5);
         let ok = true;
         for (let j = 1; j < 5; j++) if (rankIdx(slice[j])-rankIdx(slice[j-1]) !== 1) { ok = false; break; }
-        if (ok) sets.push({ type:'Straight', tag:'straight', className:'', cards:slice.map(r => byRank[r][0].code), label:`Straight ${slice[0]}-${slice[4]}` });
+        if (ok) sets.push({ type:'Straight', tag:'straight', className:'straight', cards:slice.map(r => byRank[r][0].code), label:`Straight ${slice[0]}-${slice[4]}` });
       }
 
-      // Flush
+      // 7. Flush
       Object.entries(bySuit).forEach(([suit, list]) => {
         if (list.length >= 5) {
           const sorted = list.slice().sort((a,b) => rankIdx(b.rank)-rankIdx(a.rank));
-          sets.push({ type:'Flush', tag:'flush', className:'', cards:sorted.slice(0,5).map(c=>c.code), label:`Flush ${suits[suit].symbol}` });
+          sets.push({ type:'Flush', tag:'flush', className:'flush', cards:sorted.slice(0,5).map(c=>c.code), label:`Flush ${suits[suit].symbol}` });
         }
       });
 
-      // Sort: Bomb > FullHouse > Brother > Trips > Straight > Flush > TwoPair > Pair
-      const order = { Bomb:1, FullHouse:2, Brother:3, Trips:4, Straight:5, Flush:6, TwoPair:7, Pair:8 };
-      sets.sort((a,b) => (order[a.type]||9)-(order[b.type]||9));
+      // 8. Two Pair: any two different pair ranks (non-consecutive)
+      for (let i = 0; i < pairRanks.length; i++) {
+        for (let j = i + 1; j < pairRanks.length; j++) {
+          const r1 = pairRanks[i], r2 = pairRanks[j];
+          if (rankIdx(r2)-rankIdx(r1) === 1 && r2 !== '2') continue; // Already brother
+          sets.push({
+            type: 'TwoPair',
+            tag: 'twopair',
+            className: 'twopair',
+            cards: [...byRank[r1].slice(0,2).map(c=>c.code), ...byRank[r2].slice(0,2).map(c=>c.code)],
+            label: `Two Pair ${r1}+${r2}`
+          });
+        }
+      }
+
+      // Sort order in available sets tray
+      const order = {
+        Bomb: 1,
+        RoyalFlush: 2,
+        StraightFlush: 3,
+        FullHouse: 4,
+        Brother: 5,
+        Trips: 6,
+        Straight: 7,
+        Flush: 8,
+        TwoPair: 9,
+        Pair: 10
+      };
+      sets.sort((a,b) => (order[a.type]||99)-(order[b.type]||99));
       return sets;
     }
 
@@ -1373,7 +1707,7 @@
       if (sets.length === 0) { container.innerHTML = `<div class="empty-sets">No sets available</div>`; return; }
       container.innerHTML = sets.map(s => `
         <div class="hitem ${s.className}" data-cards='${JSON.stringify(s.cards)}'>
-          <div class="hname">${s.label}<span class="tag ${s.tag}">${s.type}</span></div>
+          <div class="hname">${s.label}<span class="tag ${s.tag}">${formatComboName(s.tag || s.type)}</span></div>
           <div class="hcards">${s.cards.map(c => createMiniCard(c)).join('')}</div>
         </div>`).join('');
       container.querySelectorAll('.hitem').forEach(item => {
@@ -2650,6 +2984,13 @@
         .on('broadcast', { event: 'voice-state' }, Voice.onReceiveVoiceState)
         .on('broadcast', { event: 'peer-announce' }, Voice.onReceivePeerAnnounce)
         .on('broadcast', { event: 'chat-message' }, Chat.onReceiveMessage)
+        .on('broadcast', { event: 'room-rule' }, ({ payload }) => {
+          if (payload && payload.rule) {
+            suitRankingEnabled = (payload.rule === 'suit');
+            updateRoomRuleUI();
+            toast(`Rule set by host: ${suitRankingEnabled ? 'Symbol Ranking Matters ♠' : 'Only Number 🔢'}`, 'info');
+          }
+        })
         .subscribe(status => {
           if (status === 'SUBSCRIBED') {
             Voice.onChannelReady();
@@ -2678,6 +3019,14 @@
       Voice.syncPeers(players);
       Chat.updateRoomTag();
       if (rm.data.ver >= room.ver) room = rm.data; // ignore stale reads
+
+      // Sync room rule from scores._rule or game.settings
+      if (rm.data.game && rm.data.game.settings && typeof rm.data.game.settings.suitRanking === 'boolean') {
+        suitRankingEnabled = rm.data.game.settings.suitRanking;
+      } else if (rm.data.scores && rm.data.scores._rule) {
+        suitRankingEnabled = (rm.data.scores._rule === 'suit');
+      }
+      updateRoomRuleUI();
 
       // Self-heal: a room marked "playing" with no game state or no dealt cards can never load.
       const handOk = Array.isArray(me.hand) && me.hand_round === room.round;
@@ -2733,12 +3082,19 @@
       const res = await Promise.all(players.map(p => sb.from('players').update({ hand: byId[p.id], hand_round: round }).eq('id', p.id)));
       const bad = res.find(r => r.error); if (bad) throw bad.error;
       // Read host's current setting and bake it into the game object
-      const tog = $('togSuitRank');
-      const gameSettings = { suitRanking: tog ? tog.checked : true };
-      suitRankingEnabled = gameSettings.suitRanking;
-      await pushGame({ status: 'playing', round, game: emptyGame(order, first, gameSettings), scores: round === 0 ? {} : (room.scores || {}), last_winner: round === 0 ? null : lw });
+      const optSuit = $('optRuleSuit');
+      const isSuit = optSuit ? optSuit.checked : suitRankingEnabled;
+      suitRankingEnabled = isSuit;
+      const gameSettings = { suitRanking: suitRankingEnabled };
+      await pushGame({
+        status: 'playing',
+        round,
+        game: emptyGame(order, first, gameSettings),
+        scores: round === 0 ? { ...(room.scores || {}), _rule: suitRankingEnabled ? 'suit' : 'number' } : (room.scores || {}),
+        last_winner: round === 0 ? null : lw
+      });
       me.hand = byId[me.id]; me.hand_round = round;
-      Chat.addSystem(`🃏 Round ${round} started! Dealing cards… (Suit ranking: ${gameSettings.suitRanking ? 'ON ♠>♥>♣>♦' : 'OFF — number only'})`);
+      Chat.addSystem(`🃏 Round ${round} started! Dealing cards… [Rule: ${suitRankingEnabled ? '♠ Symbol ranking matters' : '🔢 Only number (8 cannot fight 8)'}]`);
       if (!inGame) enterGame(); else syncGame();
     }
     async function finishMatch({ winner, loser, bomb = false, game, newHand }) {
@@ -2853,6 +3209,47 @@
       if (G.winner) { if (resultRound !== room.round) { resultRound = room.round; showResult(); } }
       else $('resultOverlay').classList.remove('show');
     }
+    function updateRoomRuleUI() {
+      const optSuit = $('optRuleSuit');
+      const optNum = $('optRuleNumber');
+      const lblSuit = $('lblRuleSuit');
+      const lblNum = $('lblRuleNumber');
+      const tag = $('rsTag');
+      if (optSuit && optNum) {
+        optSuit.checked = suitRankingEnabled;
+        optNum.checked = !suitRankingEnabled;
+        if (lblSuit) lblSuit.classList.toggle('selected', suitRankingEnabled);
+        if (lblNum) lblNum.classList.toggle('selected', !suitRankingEnabled);
+        if (tag) {
+          tag.textContent = suitRankingEnabled ? '♠ Suit Ranking ON' : '🔢 Number Only';
+          tag.classList.toggle('off', !suitRankingEnabled);
+        }
+        const isHost = !!(me && me.is_host);
+        optSuit.disabled = !isHost;
+        optNum.disabled = !isHost;
+        if (lblSuit) lblSuit.style.cursor = isHost ? 'pointer' : 'default';
+        if (lblNum) lblNum.style.cursor = isHost ? 'pointer' : 'default';
+      }
+    }
+
+    function setRoomRule(isSuit) {
+      if (!me || !me.is_host) return;
+      suitRankingEnabled = isSuit;
+      updateRoomRuleUI();
+      if (channel) {
+        channel.send({
+          type: 'broadcast',
+          event: 'room-rule',
+          payload: { rule: suitRankingEnabled ? 'suit' : 'number' }
+        }).catch(() => {});
+      }
+      if (room) {
+        sb.from('rooms').update({
+          scores: { ...(room.scores || {}), _rule: suitRankingEnabled ? 'suit' : 'number' }
+        }).eq('id', room.id).catch(() => {});
+      }
+    }
+
     function renderLobby() {
       if (!room || inGame) return;
       $('lobCode').textContent = room.code;
@@ -2870,19 +3267,15 @@
       const min = CONFIG.MIN_PLAYERS_TO_START;
       $('btnStart').hidden = !me.is_host;
       $('btnStart').disabled = players.length < min;
-      // Show settings panel only to host
-      const settingsPanel = $('roomSettings');
-      if (settingsPanel) {
-        settingsPanel.hidden = !me.is_host;
-        const tog = $('togSuitRank');
-        if (tog) tog.checked = suitRankingEnabled;
-      }
+      updateRoomRuleUI();
       $('lobWait').textContent = me.is_host
         ? (players.length < min ? `Waiting for ${min - players.length} more player${min - players.length > 1 ? 's' : ''}…` : 'Start when everyone has joined.')
         : 'Waiting for the host to start the game…';
     }
     function updateBadge() {
-      $('playerRoom').textContent = room ? `Room ${room.code} · ${players.length}P · R${room.round}` : '';
+      if (!room) { $('playerRoom').textContent = ''; return; }
+      const ruleText = suitRankingEnabled ? '♠ Suits' : '🔢 Numbers';
+      $('playerRoom').textContent = `Room ${room.code} · ${players.length}P · R${room.round} · ${ruleText}`;
     }
     function enterGame() {
       if (room && !(me && Array.isArray(me.hand) && me.hand_round === room.round)) return;
@@ -2935,11 +3328,15 @@
       await refreshAll();
       await dealRound(0);
     }));
-    // Suit ranking toggle — only the host can change it; it's written into the game on deal
-    const togSuitRankEl = $('togSuitRank');
-    if (togSuitRankEl) {
-      togSuitRankEl.addEventListener('change', () => { suitRankingEnabled = togSuitRankEl.checked; });
-    }
+    // Room ranking rule controls
+    const optSuitEl = $('optRuleSuit');
+    const optNumEl = $('optRuleNumber');
+    if (optSuitEl) optSuitEl.addEventListener('change', () => { if (optSuitEl.checked) setRoomRule(true); });
+    if (optNumEl) optNumEl.addEventListener('change', () => { if (optNumEl.checked) setRoomRule(false); });
+    const lblSuitEl = $('lblRuleSuit');
+    const lblNumEl = $('lblRuleNumber');
+    if (lblSuitEl) lblSuitEl.addEventListener('click', () => { if (me && me.is_host) setRoomRule(true); });
+    if (lblNumEl) lblNumEl.addEventListener('click', () => { if (me && me.is_host) setRoomRule(false); });
     $('btnCopyCode').addEventListener('click', () => room && copy(room.code, 'Room code copied'));
     $('btnCopyLink').addEventListener('click', () => room && copy(inviteLink(room.code), 'Invite link copied'));
     $('btnShare').addEventListener('click', () => room && navigator.share({ title: 'Join my poker room', text: `Join my poker room with code ${room.code}`, url: inviteLink(room.code) }).catch(() => {}));
