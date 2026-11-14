@@ -146,16 +146,32 @@
     }
     .hitem.special { border-left-color: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.12); }
     .hitem.brother { border-left-color: #f0c14a; }
+    .hitem.twopair { border-left-color: #34d399; }
+    .hitem.fullhouse { border-left-color: #fb923c; }
     .hitem.pair { border-left-color: #60a5fa; }
     .hitem.trips { border-left-color: #a78bfa; }
     .hname { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.72rem; font-weight: 600; }
     .hname .tag { font-size: 0.52rem; padding: 2px 5px; border-radius: 3px; font-weight: 600; }
     .tag.bomb { background: rgba(239,68,68,0.22); color: #fca5a5; }
     .tag.brother { background: rgba(240,193,74,0.18); color: #fcd34d; }
+    .tag.twopair { background: rgba(52,211,153,0.15); color: #6ee7b7; }
+    .tag.fullhouse { background: rgba(251,146,60,0.18); color: #fdba74; }
     .tag.pair { background: rgba(96,165,250,0.18); color: #93c5fd; }
     .tag.trips { background: rgba(167,139,250,0.2); color: #c4b5fd; }
     .tag.straight { background: rgba(52,211,153,0.15); color: #6ee7b7; }
     .tag.flush { background: rgba(244,114,182,0.15); color: #f9a8d4; }
+    /* Room settings toggle */
+    .room-settings { margin: 6px 0 2px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .room-settings legend { font-size: 0.7rem; font-weight: 700; color: #9fb0c7; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 4px; }
+    .rs-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
+    .rs-label { font-size: 0.78rem; color: #c9d8e8; }
+    .rs-label small { display: block; font-size: 0.63rem; color: #64748b; margin-top: 1px; }
+    .rs-toggle { position: relative; width: 36px; height: 20px; }
+    .rs-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .rs-track { position: absolute; inset: 0; border-radius: 20px; background: #334155; transition: background 0.2s; cursor: pointer; }
+    .rs-track::after { content: ''; position: absolute; left: 3px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+    .rs-toggle input:checked + .rs-track { background: #22c55e; }
+    .rs-toggle input:checked + .rs-track::after { transform: translateX(16px); }
     .hcards { display: flex; gap: 2px; flex-wrap: wrap; }
     .mc {
       width: 22px; height: 30px; background: #fff; border-radius: 2px;
@@ -309,35 +325,154 @@
     .auto-pass.show { opacity: 1; }
 
     @media (max-width: 768px) {
-      .voice-controls { top: 8px; right: 8px; }
-      .voice-btn { width: 36px; height: 36px; font-size: 0.9rem; }
+      /* TOP BAR */
+      .player-header {
+        top: 8px; left: 8px; padding: 4px 10px 4px 6px;
+        border-radius: 999px; gap: 6px; z-index: 40;
+        max-width: calc(100vw - 165px);
+        background: rgba(10,14,22,0.92);
+      }
+      .player-av { width: 30px; height: 30px; font-size: 0.8rem; }
+      .player-name { font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .player-status { display: none; } /* Redundant with remaining cards at bottom */
+      .player-room { font-size: 0.6rem; margin-top: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--gold); }
+
+      .voice-controls {
+        top: 8px; right: 8px; gap: 5px; z-index: 250;
+      }
+      .voice-btn {
+        width: 32px; height: 32px; font-size: 0.82rem;
+      }
+      .chat-badge {
+        min-width: 15px; height: 15px; font-size: 0.55rem; top: -3px; right: -3px;
+      }
+
+      /* OPPONENTS SEATS (Horizontally aligned, single row, below header) */
+      .seats {
+        top: 48px; left: 50%; transform: translateX(-50%);
+        max-width: 96vw; width: max-content;
+        display: flex; flex-direction: row; flex-wrap: nowrap;
+        justify-content: center; align-items: center; gap: 6px;
+        overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+        z-index: 28; pointer-events: auto; padding: 2px 4px;
+      }
+      .seats::-webkit-scrollbar { display: none; }
+      .seat {
+        padding: 3px 9px 3px 4px; border-radius: 999px; gap: 6px;
+        flex-shrink: 0;
+      }
+      .seat .av { width: 22px; height: 22px; font-size: 0.68rem; }
+      .seat b { font-size: 0.72rem; }
+      .seat i { font-size: 0.6rem; }
+      /* Hide local player from seats on mobile - they already have player-header & remaining cards */
+      .seat.me { display: none !important; }
+
+      /* TABLE AREA */
+      .table-area {
+        top: 82px; left: 6px; right: 6px; bottom: 148px;
+        padding: 0; z-index: 5;
+      }
+      .table {
+        width: 100%; max-width: 440px; aspect-ratio: 1.45 / 1;
+        max-height: 100%; border-width: 7px;
+        gap: 4px; position: relative;
+      }
+      .table-label {
+        position: absolute; top: 10px; font-size: 0.55rem;
+        letter-spacing: 1px; opacity: 0.4;
+      }
+
+      /* TURN BANNER: Docked gracefully on top border of table rail */
+      .turn-banner {
+        top: -12px; left: 50%; transform: translateX(-50%);
+        font-size: 0.65rem; padding: 3px 11px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      }
+
+      /* PLAY ZONE: Centered inside table */
+      .play-zone {
+        min-height: 64px; padding: 2px 8px; gap: 4px;
+        margin: auto 0;
+      }
+      .play-empty { font-size: 0.74rem; }
+      .card.lg { width: 44px; height: 62px; border-radius: 6px; }
+      .card.lg .c-suit { font-size: 1.15rem; }
+      .card.lg .c-rank { font-size: 0.7rem; }
+
+      /* ACTION BUTTONS: Positioned at bottom of table without overlapping cards */
+      .action-btns {
+        bottom: 8px; gap: 6px;
+      }
+      .btn {
+        padding: 7px 12px; font-size: 0.66rem; border-radius: 8px;
+      }
+      .btn-giveup {
+        padding: 7px 9px; opacity: 0.85;
+      }
+      .auto-pass {
+        bottom: 40px; font-size: 0.65rem;
+      }
+
+      /* AVAILABLE SETS: Compact chips above the bottom bar */
       .hands-float {
-        position: fixed; top: auto; bottom: 130px; right: 8px; left: 8px;
-        width: auto; height: auto; max-height: 100px; flex-direction: row; overflow: hidden;
+        position: fixed; top: auto; bottom: 102px; left: 8px; right: 8px;
+        width: auto; height: auto; max-height: 40px; z-index: 18;
+        display: flex; flex-direction: row; align-items: center;
+        background: transparent; pointer-events: auto;
       }
       .hands-title { display: none; }
-      .hands-scroll { flex-direction: row; overflow-x: auto; overflow-y: hidden; gap: 6px; }
-      .hitem { min-width: 105px; flex-shrink: 0; }
-      .table-area { top: 58px; right: 0; left: 0; bottom: 250px; padding: 4px; }
-      .table { aspect-ratio: 1.35 / 1; border-width: 8px; max-width: 95%; }
-      .action-btns { bottom: 9%; gap: 6px; }
-      .btn { padding: 8px 11px; font-size: 0.68rem; }
-      .card.lg { width: 46px; height: 66px; }
-      .card.lg .c-suit { font-size: 1.2rem; }
-      .card.lg .c-rank { font-size: 0.72rem; }
-      .bottom-bar { padding: 6px 8px 10px; }
-      .card.sm { width: 36px; height: 50px; }
-      .card.sm .c-rank { font-size: 0.7rem; }
-      .card.sm .c-suit { font-size: 0.9rem; }
-      .player-header { top: 8px; left: 8px; padding: 6px 10px 6px 6px; }
-      .player-av { width: 32px; height: 32px; font-size: 0.85rem; }
-      .player-name { font-size: 0.88rem; }
+      .hands-scroll {
+        display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden;
+        gap: 6px; width: 100%; padding: 2px 2px;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      }
+      .hands-scroll::-webkit-scrollbar { display: none; }
+      .hitem {
+        min-width: auto; height: 32px; padding: 2px 8px; border-radius: 999px;
+        display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+        background: var(--glass), rgba(12,18,30,0.65);
+        border: 1px solid var(--glass-border);
+      }
+      .hitem .hname {
+        margin-bottom: 0; font-size: 0.68rem; font-weight: 700; white-space: nowrap;
+        gap: 4px;
+      }
+      .hitem .hname .tag { font-size: 0.48rem; padding: 1px 4px; }
+      .hitem .hcards { display: inline-flex; gap: 2px; align-items: center; }
+      .mc { width: 17px; height: 23px; font-size: 0.48rem; border-radius: 2px; }
+      .mc .s { font-size: 0.52rem; }
+      .empty-sets { display: none; }
+
+      /* BOTTOM BAR: Hand cards */
+      .bottom-bar {
+        padding: 6px 8px 10px; z-index: 20;
+        border-radius: 18px 18px 0 0;
+      }
+      .remain-header {
+        margin-bottom: 4px; gap: 6px;
+      }
+      .remain-label { font-size: 0.58rem; letter-spacing: 0.8px; }
+      .remain-count { font-size: 0.72rem; padding: 1px 6px; }
+      .remain-cards {
+        display: flex; gap: 4px; overflow-x: auto; padding: 4px 2px 6px;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      }
+      .remain-cards::-webkit-scrollbar { display: none; }
+      .card.sm {
+        width: 36px; height: 50px; border-radius: 5px; flex-shrink: 0;
+      }
+      .card.sm .c-rank { font-size: 0.68rem; }
+      .card.sm .c-suit { font-size: 0.85rem; }
     }
+
     @media (max-width: 400px) {
-      .card.sm { width: 32px; height: 46px; }
-      .card.lg { width: 40px; height: 58px; }
-      .btn { padding: 7px 9px; font-size: 0.62rem; }
-      .voice-btn { width: 32px; height: 32px; }
+      .player-header { max-width: calc(100vw - 145px); }
+      .table-area { top: 78px; bottom: 140px; }
+      .card.sm { width: 33px; height: 46px; }
+      .card.lg { width: 40px; height: 56px; }
+      .btn { padding: 6px 9px; font-size: 0.62rem; }
+      .voice-btn { width: 30px; height: 30px; font-size: 0.78rem; }
+      .hands-float { bottom: 96px; }
     }
 
     /* ============ GLASSMORPHISM + INTERACTION LAYER ============ */
@@ -389,6 +524,8 @@
     .hitem:hover::before { transform: translateX(110%); }
     .hitem.special:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(239,68,68,0.3); }
     .hitem.brother:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(240,193,74,0.28); }
+    .hitem.twopair:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(52,211,153,0.28); }
+    .hitem.fullhouse:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(251,146,60,0.28); }
     .hitem.pair:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(96,165,250,0.28); }
     .hitem.trips:hover { box-shadow: var(--glass-edge), 0 8px 22px rgba(0,0,0,0.4), 0 0 22px rgba(167,139,250,0.3); }
     .hitem:active { transform: translateX(-2px) scale(0.98); }
@@ -590,7 +727,6 @@
     .sr span:nth-child(2) { color: #4ade80; font-weight: 700; }
     .sr span:nth-child(3) { color: #f87171; font-weight: 700; }
     .result .wait { margin-bottom: 8px; }
-    @media (max-width: 768px) { .seats { top: 56px; max-width: calc(100vw - 16px); } .table-area { top: 104px; } .turn-banner { top: 10%; } }
     .m-boot #bootHelp { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 6px; }
     .m-boot #bootHelp p { font-size: 0.78rem; color: #94a3b8; }
 
@@ -826,7 +962,7 @@
       </button>
     </form>
   </div>
-  <div id="remoteAudios" style="display:none"></div>
+  <div id="remoteAudios" style="position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;"></div>
 
   <div class="hands-float">
     <div class="hands-title">Available Sets <span id="setCount">0</span></div>
@@ -949,6 +1085,19 @@
         <p class="m-hint" id="linkHint" hidden>This file is opened from your computer, so the link only works here. Host the page online so friends can open it. The room code works the same once they do.</p>
         <div class="m-label">Players <span id="lobCount"></span></div>
         <ul class="plist" id="lobList"></ul>
+        <fieldset class="room-settings" id="roomSettings" hidden>
+          <legend>⚙️ Room Rules</legend>
+          <div class="rs-row">
+            <label class="rs-label" for="togSuitRank">
+              Suit matters for ranking
+              <small>♠ beats ♥ of same number</small>
+            </label>
+            <label class="rs-toggle">
+              <input type="checkbox" id="togSuitRank" checked>
+              <span class="rs-track"></span>
+            </label>
+          </div>
+        </fieldset>
         <button class="m-btn primary" id="btnStart">Start game</button>
         <p class="m-wait" id="lobWait"></p>
         <button class="m-link" id="btnLeaveLobby">Leave room</button>
@@ -965,6 +1114,9 @@
     };
     const RANK_ORDER = ['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
     const SUIT_PRIORITY = { S: 4, H: 3, C: 2, D: 1 };
+
+    // Room-level settings (host sets before deal, synced inside game object)
+    let suitRankingEnabled = true;
 
     let remaining = [];
     let playedCards = [];
@@ -992,7 +1144,17 @@
     function sortHand(h) {
       return h.slice().sort((x, y) => { const a = parseCard(x), b = parseCard(y); return rankValue(b.rank) - rankValue(a.rank) || SUIT_PRIORITY[b.suit] - SUIT_PRIORITY[a.suit]; });
     }
-    function dealHands(count) { const deck = shuffle(buildDeck()); return Array.from({ length: count }, (_, i) => sortHand(deck.slice(i * 13, i * 13 + 13))); }
+    function dealHands(count) {
+      const deck = shuffle(buildDeck());
+      // Distribute ALL 52 cards — some players may get 1 extra card
+      return Array.from({ length: count }, (_, i) => {
+        const base = Math.floor(deck.length / count);
+        const extra = deck.length % count;
+        const start = i * base + Math.min(i, extra);
+        const end = start + base + (i < extra ? 1 : 0);
+        return sortHand(deck.slice(start, end));
+      });
+    }
 
     function createLargeCard(code) {
       const { rank, symbol, color } = parseCard(code);
@@ -1021,16 +1183,21 @@
       const byRank = {};
       parsed.forEach(c => { if (!byRank[c.rank]) byRank[c.rank] = []; byRank[c.rank].push(c); });
       const ranks = Object.keys(byRank);
-      const counts = ranks.map(r => byRank[r].length);
+      const counts = ranks.map(r => byRank[r].length).sort((a,b) => b-a);
       if (codes.length === 1) return 'single';
       if (codes.length === 2 && ranks.length === 1) return 'pair';
       if (codes.length === 3 && ranks.length === 1) return 'trips';
       if (codes.length === 4 && ranks.length === 1) return 'bomb';
-      if (codes.length === 4 && ranks.length === 2 && counts.every(c => c === 2)) {
-        const sorted = ranks.sort((a,b) => rankValue(a)-rankValue(b));
+      if (codes.length === 4 && ranks.length === 2 && counts[0] === 2 && counts[1] === 2) {
+        const sorted = ranks.slice().sort((a,b) => rankValue(a)-rankValue(b));
+        // Brother: exactly consecutive non-2 ranks
         if (rankValue(sorted[1])-rankValue(sorted[0]) === 1 && !sorted.includes('2')) return 'brother';
+        // Two Pair: any two pairs (non-consecutive or consecutive)
+        return 'twopair';
       }
       if (codes.length === 5) {
+        // Full House: 3+2
+        if (ranks.length === 2 && (counts[0] === 3 && counts[1] === 2)) return 'fullhouse';
         const unique = [...new Set(parsed.map(c => c.rank))];
         if (unique.length === 5 && !unique.includes('2')) {
           unique.sort((a,b) => rankValue(a)-rankValue(b));
@@ -1060,11 +1227,34 @@
         return { ok: false, reason: 'Only Trips can beat Trips' };
       if (playedType === 'brother' && newType !== 'brother')
         return { ok: false, reason: 'Only Brother can beat Brother' };
+      if (playedType === 'twopair' && newType !== 'twopair')
+        return { ok: false, reason: 'Only Two Pair can beat Two Pair' };
+      if (playedType === 'fullhouse' && newType !== 'fullhouse')
+        return { ok: false, reason: 'Only Full House can beat Full House' };
       if ((playedType === 'straight' || playedType === 'flush') && newType !== playedType)
         return { ok: false, reason: `Only ${playedType} can beat this` };
       if (playedType === 'bomb')
         return { ok: false, reason: 'Bomb already ended the match' };
-      const strength = c => { const k = parseCard(c); return rankValue(k.rank) * 10 + SUIT_PRIORITY[k.suit]; };
+
+      // Strength comparison
+      const suitBonus = suitRankingEnabled ? 1 : 0;
+      const strength = c => { const k = parseCard(c); return rankValue(k.rank) * 10 + SUIT_PRIORITY[k.suit] * suitBonus; };
+
+      if (newType === 'fullhouse' || newType === 'twopair') {
+        // Compare by the dominant group (trips rank for fullhouse, higher pair for twopair)
+        const dominantRank = (codes) => {
+          const p = codes.map(parseCard);
+          const br = {};
+          p.forEach(c => { br[c.rank] = (br[c.rank] || 0) + 1; });
+          const target = newType === 'fullhouse' ? 3 : 2;
+          const dominant = Object.entries(br).filter(([,v]) => v === target).map(([k]) => k).sort((a,b) => rankValue(b)-rankValue(a))[0];
+          // Best card of dominant rank
+          return Math.max(...codes.filter(c => parseCard(c).rank === dominant).map(c => strength(c)));
+        };
+        if (dominantRank(newCodes) <= dominantRank(playedCards)) return { ok: false, reason: 'Must be higher than current played' };
+        return { ok: true };
+      }
+
       const newMax = Math.max(...newCodes.map(strength));
       const playedMax = Math.max(...playedCards.map(strength));
       if (newMax <= playedMax) return { ok: false, reason: 'Must be higher than current played' };
@@ -1086,12 +1276,30 @@
       });
       const sets = [];
       const rankIdx = r => RANK_ORDER.indexOf(r);
+
+      // Bomb (4-of-a-kind)
       Object.entries(byRank).forEach(([rank, list]) => {
         if (list.length >= 4) sets.push({ type:'Bomb', tag:'bomb', className:'special', cards:list.slice(0,4).map(c=>c.code), label:`Bomb ${rank}` });
       });
+
+      // Full House (3+2) — trips rank is dominant
+      const tripRanks = Object.entries(byRank).filter(([,l]) => l.length >= 3).map(([r]) => r);
+      const pairRanksForFH = Object.entries(byRank).filter(([,l]) => l.length >= 2).map(([r]) => r);
+      tripRanks.forEach(tr => {
+        pairRanksForFH.forEach(pr => {
+          if (pr === tr) return;
+          sets.push({ type:'FullHouse', tag:'fullhouse', className:'fullhouse',
+            cards:[...byRank[tr].slice(0,3).map(c=>c.code), ...byRank[pr].slice(0,2).map(c=>c.code)],
+            label:`Full House ${tr}s over ${pr}s` });
+        });
+      });
+
+      // Trips
       Object.entries(byRank).forEach(([rank, list]) => {
         if (list.length >= 3) sets.push({ type:'Trips', tag:'trips', className:'trips', cards:list.slice(0,3).map(c=>c.code), label:`Trips ${rank}` });
       });
+
+      // Build pair ranks list
       const pairRanks = [];
       Object.entries(byRank).forEach(([rank, list]) => {
         if (list.length >= 2) {
@@ -1100,6 +1308,8 @@
         }
       });
       pairRanks.sort((a,b) => rankIdx(a)-rankIdx(b));
+
+      // Brother: consecutive non-2 pair ranks
       for (let i = 0; i < pairRanks.length-1; i++) {
         const r1 = pairRanks[i], r2 = pairRanks[i+1];
         if (rankIdx(r2)-rankIdx(r1) === 1 && r2 !== '2') {
@@ -1108,6 +1318,20 @@
             label:`Brother ${r1}${r2}` });
         }
       }
+
+      // Two Pair: any two different pair ranks (non-consecutive — Brother already covers consecutive)
+      for (let i = 0; i < pairRanks.length; i++) {
+        for (let j = i + 1; j < pairRanks.length; j++) {
+          const r1 = pairRanks[i], r2 = pairRanks[j];
+          // Skip if consecutive non-2 (those are already Brother)
+          if (rankIdx(r2)-rankIdx(r1) === 1 && r2 !== '2') continue;
+          sets.push({ type:'TwoPair', tag:'twopair', className:'twopair',
+            cards:[...byRank[r1].slice(0,2).map(c=>c.code), ...byRank[r2].slice(0,2).map(c=>c.code)],
+            label:`Two Pair ${r1}+${r2}` });
+        }
+      }
+
+      // Straight
       const uniqueRanks = [...new Set(parsed.map(c => c.rank).filter(r => r !== '2'))].sort((a,b)=>rankIdx(a)-rankIdx(b));
       for (let i = 0; i <= uniqueRanks.length-5; i++) {
         const slice = uniqueRanks.slice(i, i+5);
@@ -1115,13 +1339,17 @@
         for (let j = 1; j < 5; j++) if (rankIdx(slice[j])-rankIdx(slice[j-1]) !== 1) { ok = false; break; }
         if (ok) sets.push({ type:'Straight', tag:'straight', className:'', cards:slice.map(r => byRank[r][0].code), label:`Straight ${slice[0]}-${slice[4]}` });
       }
+
+      // Flush
       Object.entries(bySuit).forEach(([suit, list]) => {
         if (list.length >= 5) {
           const sorted = list.slice().sort((a,b) => rankIdx(b.rank)-rankIdx(a.rank));
           sets.push({ type:'Flush', tag:'flush', className:'', cards:sorted.slice(0,5).map(c=>c.code), label:`Flush ${suits[suit].symbol}` });
         }
       });
-      const order = { Bomb:1, Brother:2, Trips:3, Straight:4, Flush:5, Pair:6 };
+
+      // Sort: Bomb > FullHouse > Brother > Trips > Straight > Flush > TwoPair > Pair
+      const order = { Bomb:1, FullHouse:2, Brother:3, Trips:4, Straight:5, Flush:6, TwoPair:7, Pair:8 };
       sets.sort((a,b) => (order[a.type]||9)-(order[b.type]||9));
       return sets;
     }
@@ -1136,8 +1364,12 @@
 
     function renderAvailableSets() {
       const container = document.getElementById('availableSets');
+      const floatBox = document.querySelector('.hands-float');
       const sets = findAvailableSets(remaining);
       document.getElementById('setCount').textContent = sets.length;
+      if (floatBox && window.innerWidth <= 768) {
+        floatBox.style.display = sets.length === 0 ? 'none' : 'flex';
+      }
       if (sets.length === 0) { container.innerHTML = `<div class="empty-sets">No sets available</div>`; return; }
       container.innerHTML = sets.map(s => `
         <div class="hitem ${s.className}" data-cards='${JSON.stringify(s.cards)}'>
@@ -1355,8 +1587,27 @@
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' }
-        ]
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' },
+          { urls: 'stun:stun.relay.metered.ca:80' },
+          {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          }
+        ],
+        iceCandidatePoolSize: 10
       };
 
       let localStream = null;
@@ -1369,6 +1620,7 @@
       const peerStates = new Map();
 
       let audioCtx = null;
+      let silentTrack = null;
       let localAnalyser = null;
       let localSpeaking = false;
       let vadTimer = null;
@@ -1376,12 +1628,38 @@
 
       function ensureAudioContext() {
         if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+          }
         }
-        if (audioCtx.state === 'suspended') {
+        if (audioCtx && audioCtx.state === 'suspended') {
           audioCtx.resume().catch(() => {});
         }
         return audioCtx;
+      }
+
+      function getSilentTrack() {
+        try {
+          if (silentTrack && silentTrack.readyState === 'live') return silentTrack;
+          const ctx = ensureAudioContext();
+          if (!ctx) return null;
+          const osc = ctx.createOscillator();
+          const dst = ctx.createMediaStreamDestination();
+          const gain = ctx.createGain();
+          gain.gain.value = 0.00001; // virtually silent
+          osc.connect(gain);
+          gain.connect(dst);
+          osc.start();
+          silentTrack = dst.stream.getAudioTracks()[0];
+          if (silentTrack) {
+            silentTrack.onended = () => { silentTrack = null; };
+          }
+          return silentTrack;
+        } catch (e) {
+          console.warn('[WebRTC] Silent track init error:', e);
+          return null;
+        }
       }
 
       function updateSpeakingUI(peerId, speaking) {
@@ -1462,7 +1740,7 @@
       }
 
       async function getOrInitLocalStream() {
-        if (localStream) return localStream;
+        if (localStream && localStream.active && localStream.getAudioTracks().length > 0) return localStream;
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error('Microphone not supported on this browser or connection (HTTPS / localhost required).');
         }
@@ -1493,17 +1771,27 @@
             localStream.getAudioTracks().forEach(t => t.enabled = isMicActive);
           }
 
-          if (localStream && isMicActive) {
-            const audioTrack = localStream.getAudioTracks()[0];
-            peerConnections.forEach(pc => {
-              const sender = pc.getSenders().find(s => s.track?.kind === 'audio' || s.track === null);
-              if (sender) {
-                sender.replaceTrack(audioTrack).catch(err => console.warn('replaceTrack error:', err));
-              } else {
-                try { pc.addTrack(audioTrack, localStream); } catch (e) {}
+          const liveTrack = (localStream && isMicActive && localStream.getAudioTracks()[0])
+            ? localStream.getAudioTracks()[0]
+            : null;
+          const trackToUse = liveTrack || getSilentTrack();
+
+          peerConnections.forEach(pc => {
+            if (pc.connectionState === 'closed') return;
+            const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'audio');
+            if (senders.length > 0) {
+              senders.forEach(s => {
+                if (trackToUse) s.replaceTrack(trackToUse).catch(e => console.warn('replaceTrack err:', e));
+              });
+            } else {
+              const anySender = pc.getSenders()[0];
+              if (anySender && trackToUse) {
+                anySender.replaceTrack(trackToUse).catch(e => console.warn('replaceTrack err:', e));
+              } else if (trackToUse) {
+                try { pc.addTrack(trackToUse, new MediaStream([trackToUse])); } catch(e) {}
               }
-            });
-          }
+            }
+          });
 
           const micBtn = $('btnMic');
           if (micBtn) {
@@ -1533,7 +1821,12 @@
       function toggleSpeaker() {
         isSpeakerActive = !isSpeakerActive;
         remoteAudios.forEach(audio => {
-          audio.muted = !isSpeakerActive;
+          if (audio) {
+            audio.muted = !isSpeakerActive;
+            if (isSpeakerActive && audio.paused) {
+              audio.play().catch(() => {});
+            }
+          }
         });
         const spkBtn = $('btnSpeaker');
         if (spkBtn) {
@@ -1545,40 +1838,61 @@
       }
 
       async function createPeer(peerId, isInitiator) {
-        if (peerConnections.has(peerId)) return peerConnections.get(peerId);
+        if (peerConnections.has(peerId)) {
+          const existing = peerConnections.get(peerId);
+          if (existing.connectionState !== 'closed' && existing.connectionState !== 'failed') {
+            return existing;
+          }
+          cleanupPeer(peerId);
+        }
 
+        console.log(`[WebRTC] Creating peer connection for ${peerId}, initiator=${isInitiator}`);
         const pc = new RTCPeerConnection(rtcConfig);
         peerConnections.set(peerId, pc);
         pendingCandidates.set(peerId, []);
 
-        if (localStream && localStream.getAudioTracks().length > 0) {
-          localStream.getAudioTracks().forEach(track => {
-            try { pc.addTrack(track, localStream); } catch (e) {}
-          });
+        const liveTrack = (localStream && isMicActive && localStream.getAudioTracks()[0])
+          ? localStream.getAudioTracks()[0]
+          : null;
+        const initialTrack = liveTrack || getSilentTrack();
+
+        if (initialTrack) {
+          try {
+            pc.addTrack(initialTrack, new MediaStream([initialTrack]));
+          } catch (e) {
+            console.warn('[WebRTC] addTrack initial error:', e);
+          }
         } else {
           try {
             pc.addTransceiver('audio', { direction: 'sendrecv' });
           } catch (e) {
-            console.warn('Transceiver add error:', e);
+            console.warn('[WebRTC] Transceiver add error:', e);
           }
         }
 
         pc.onicecandidate = (event) => {
           if (event.candidate && channel && me) {
+            const cand = event.candidate.toJSON ? event.candidate.toJSON() : {
+              candidate: event.candidate.candidate,
+              sdpMid: event.candidate.sdpMid,
+              sdpMLineIndex: event.candidate.sdpMLineIndex,
+              usernameFragment: event.candidate.usernameFragment
+            };
             channel.send({
               type: 'broadcast',
               event: 'webrtc-signal',
               payload: {
                 to: peerId,
                 from: me.id,
-                candidate: event.candidate
+                candidate: cand
               }
-            }).catch(() => {});
+            }).catch(err => console.warn('[WebRTC] Failed to send ICE candidate:', err));
           }
         };
 
         pc.ontrack = (event) => {
-          const stream = event.streams && event.streams[0] ? event.streams[0] : new MediaStream([event.track]);
+          console.log(`[WebRTC] ontrack from ${peerId}:`, event.track.kind);
+          const stream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
           remoteStreams.set(peerId, stream);
 
           let audioEl = remoteAudios.get(peerId);
@@ -1586,33 +1900,73 @@
             audioEl = document.createElement('audio');
             audioEl.autoplay = true;
             audioEl.playsInline = true;
-            audioEl.style.display = 'none';
-            $('remoteAudios').appendChild(audioEl);
+            audioEl.setAttribute('playsinline', '');
+            audioEl.setAttribute('webkit-playsinline', '');
+            audioEl.style.position = 'absolute';
+            audioEl.style.width = '1px';
+            audioEl.style.height = '1px';
+            audioEl.style.opacity = '0.01';
+            const container = $('remoteAudios') || document.body;
+            container.appendChild(audioEl);
             remoteAudios.set(peerId, audioEl);
           }
           audioEl.srcObject = stream;
+          audioEl.volume = 1.0;
           audioEl.muted = !isSpeakerActive;
-          audioEl.play().catch(e => {
-            console.log('Autoplay audio deferred:', e);
-            const resumeOnUserClick = () => {
-              audioEl.play().catch(() => {});
-              document.removeEventListener('click', resumeOnUserClick);
-            };
-            document.addEventListener('click', resumeOnUserClick);
-          });
+
+          const p = audioEl.play();
+          if (p !== undefined) {
+            p.catch(e => {
+              console.warn(`[WebRTC] Autoplay deferred for ${peerId}:`, e);
+              if (isSpeakerActive) {
+                toast('Tap anywhere to enable audio 🔊', 'info');
+              }
+            });
+          }
 
           setupRemoteAnalyser(peerId, stream);
         };
 
         pc.onconnectionstatechange = () => {
-          if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
-            cleanupPeer(peerId);
+          console.log(`[WebRTC] Peer ${peerId} connectionState: ${pc.connectionState}`);
+          if (pc.connectionState === 'connected') {
+            console.log(`[WebRTC] Peer ${peerId} CONNECTED!`);
+            const audioEl = remoteAudios.get(peerId);
+            if (audioEl && audioEl.paused) {
+              audioEl.play().catch(() => {});
+            }
+          } else if (pc.connectionState === 'failed') {
+            console.warn(`[WebRTC] Peer ${peerId} connection failed. Attempting ICE restart...`);
+            if (isInitiator && typeof pc.restartIce === 'function') {
+              try {
+                pc.restartIce();
+                pc.createOffer({ iceRestart: true }).then(offer => {
+                  return pc.setLocalDescription(offer);
+                }).then(() => {
+                  if (channel && me) {
+                    channel.send({
+                      type: 'broadcast',
+                      event: 'webrtc-signal',
+                      payload: {
+                        to: peerId,
+                        from: me.id,
+                        sdp: { type: pc.localDescription.type, sdp: pc.localDescription.sdp }
+                      }
+                    }).catch(() => {});
+                  }
+                }).catch(err => console.warn('ICE restart error:', err));
+              } catch (e) {}
+            }
           }
+        };
+
+        pc.oniceconnectionstatechange = () => {
+          console.log(`[WebRTC] Peer ${peerId} iceConnectionState: ${pc.iceConnectionState}`);
         };
 
         if (isInitiator) {
           try {
-            const offer = await pc.createOffer();
+            const offer = await pc.createOffer({ offerToReceiveAudio: true });
             await pc.setLocalDescription(offer);
             if (channel && me) {
               channel.send({
@@ -1621,9 +1975,9 @@
                 payload: {
                   to: peerId,
                   from: me.id,
-                  sdp: pc.localDescription
+                  sdp: { type: pc.localDescription.type, sdp: pc.localDescription.sdp }
                 }
-              }).catch(() => {});
+              }).catch(err => console.warn('Send offer error:', err));
             }
           } catch (e) {
             console.error('Error creating offer for peer ' + peerId, e);
@@ -1636,6 +1990,7 @@
       function setupRemoteAnalyser(peerId, stream) {
         try {
           const ctx = ensureAudioContext();
+          if (!ctx) return;
           const source = ctx.createMediaStreamSource(stream);
           const analyser = ctx.createAnalyser();
           analyser.fftSize = 256;
@@ -1674,7 +2029,10 @@
         remoteStreams.delete(peerId);
         const audioEl = remoteAudios.get(peerId);
         if (audioEl) {
-          try { audioEl.srcObject = null; audioEl.remove(); } catch (e) {}
+          try {
+            audioEl.srcObject = null;
+            audioEl.remove();
+          } catch (e) {}
           remoteAudios.delete(peerId);
         }
         remoteAnalysers.delete(peerId);
@@ -1691,10 +2049,27 @@
         if (payload.sdp) {
           const sdp = payload.sdp;
           if (sdp.type === 'offer') {
-            if (!pc) {
+            if (!pc || pc.connectionState === 'closed' || pc.connectionState === 'failed') {
               pc = await createPeer(peerId, false);
             }
-            await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+            try {
+              await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+            } catch (err) {
+              console.warn('[WebRTC] setRemoteDescription offer error:', err);
+              cleanupPeer(peerId);
+              pc = await createPeer(peerId, false);
+              await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+            }
+
+            const liveTrack = (localStream && isMicActive && localStream.getAudioTracks()[0])
+              ? localStream.getAudioTracks()[0]
+              : null;
+            const trackToSend = liveTrack || getSilentTrack();
+            const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio') || pc.getSenders()[0];
+            if (audioSender && trackToSend && !audioSender.track) {
+              try { await audioSender.replaceTrack(trackToSend); } catch (e) {}
+            }
+
             const queued = pendingCandidates.get(peerId) || [];
             for (const c of queued) {
               try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (e) {}
@@ -1711,28 +2086,35 @@
                 payload: {
                   to: peerId,
                   from: me.id,
-                  sdp: pc.localDescription
+                  sdp: { type: pc.localDescription.type, sdp: pc.localDescription.sdp }
                 }
-              }).catch(() => {});
+              }).catch(err => console.warn('Send answer error:', err));
             }
           } else if (sdp.type === 'answer') {
             if (pc) {
-              await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-              const queued = pendingCandidates.get(peerId) || [];
-              for (const c of queued) {
-                try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (e) {}
+              try {
+                await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+                const queued = pendingCandidates.get(peerId) || [];
+                for (const c of queued) {
+                  try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (e) {}
+                }
+                pendingCandidates.set(peerId, []);
+              } catch (err) {
+                console.warn('[WebRTC] setRemoteDescription answer error:', err);
               }
-              pendingCandidates.set(peerId, []);
             }
           }
         } else if (payload.candidate) {
+          const cand = payload.candidate;
           if (pc && pc.remoteDescription && pc.remoteDescription.type) {
             try {
-              await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
-            } catch (e) {}
+              await pc.addIceCandidate(new RTCIceCandidate(cand));
+            } catch (e) {
+              console.warn('[WebRTC] addIceCandidate error:', e);
+            }
           } else {
             if (!pendingCandidates.has(peerId)) pendingCandidates.set(peerId, []);
-            pendingCandidates.get(peerId).push(payload.candidate);
+            pendingCandidates.get(peerId).push(cand);
           }
         }
       }
@@ -1789,6 +2171,14 @@
           if (!peerConnections.has(peerId)) {
             if (me.id < peerId) {
               createPeer(peerId, true);
+            } else {
+              if (channel) {
+                channel.send({
+                  type: 'broadcast',
+                  event: 'peer-announce',
+                  payload: { id: me.id, action: 'hello', to: peerId }
+                }).catch(() => {});
+              }
             }
           }
         });
@@ -1846,6 +2236,21 @@
       function getMicIcon(peerId) {
         return isMuted(peerId) ? '🔇' : '🎤';
       }
+
+      // Unlock autoplay audio on any user interaction across the page
+      function unlockAllAudio() {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        remoteAudios.forEach(audio => {
+          if (audio && audio.paused) {
+            audio.play().catch(() => {});
+          }
+        });
+      }
+      ['click', 'touchstart', 'touchend', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, unlockAllAudio, { passive: true });
+      });
 
       return {
         toggleMic,
@@ -2147,7 +2552,7 @@
       }
       return fromId;
     }
-    const emptyGame = (order, turn) => ({ order, turn, table: null, passed: [], winner: null, loser: null, bomb: false });
+    const emptyGame = (order, turn, settings = {}) => ({ order, turn, table: null, passed: [], winner: null, loser: null, bomb: false, settings });
 
     /* ---------- Supabase: room membership ---------- */
     async function resetRoom(roomId) {
@@ -2327,9 +2732,13 @@
       const first = round > 0 && lw && order.includes(lw) ? lw : pickFirstTurn(byId, order);
       const res = await Promise.all(players.map(p => sb.from('players').update({ hand: byId[p.id], hand_round: round }).eq('id', p.id)));
       const bad = res.find(r => r.error); if (bad) throw bad.error;
-      await pushGame({ status: 'playing', round, game: emptyGame(order, first), scores: round === 0 ? {} : (room.scores || {}), last_winner: round === 0 ? null : lw });
+      // Read host's current setting and bake it into the game object
+      const tog = $('togSuitRank');
+      const gameSettings = { suitRanking: tog ? tog.checked : true };
+      suitRankingEnabled = gameSettings.suitRanking;
+      await pushGame({ status: 'playing', round, game: emptyGame(order, first, gameSettings), scores: round === 0 ? {} : (room.scores || {}), last_winner: round === 0 ? null : lw });
       me.hand = byId[me.id]; me.hand_round = round;
-      Chat.addSystem(`🃏 Round ${round} started! Dealing cards...`);
+      Chat.addSystem(`🃏 Round ${round} started! Dealing cards… (Suit ranking: ${gameSettings.suitRanking ? 'ON ♠>♥>♣>♦' : 'OFF — number only'})`);
       if (!inGame) enterGame(); else syncGame();
     }
     async function finishMatch({ winner, loser, bomb = false, game, newHand }) {
@@ -2405,7 +2814,7 @@
       if (!G || G.winner) { b.hidden = true; return; }
       b.hidden = false; b.classList.toggle('mine', mine);
       b.textContent = mine ? (G.table ? 'Your turn' : 'Your turn · lead any set') : `${nameOf(G.turn)}'s turn`;
-      document.querySelector('.table-label').textContent = G.table ? `${nameOf(G.table.by)} played` : 'Table is clear';
+      document.querySelector('.table-label').textContent = G.table ? `${nameOf(G.table.by)} played` : '';
     }
     function showResult() {
       const G = room.game, iLose = G.loser === me.id;
@@ -2422,6 +2831,10 @@
     function syncGame() {
       if (!room || !inGame || !room.game) return;
       const G = room.game;
+      // Apply room settings from game object (synced across all players)
+      if (G.settings && typeof G.settings.suitRanking === 'boolean') {
+        suitRankingEnabled = G.settings.suitRanking;
+      }
       if (loadedRound !== room.round) {
         if (!(Array.isArray(me.hand) && me.hand_round === room.round)) return; // cards not dealt yet; next refresh retries
         loadedRound = room.round; lastKey = null; resultRound = null;
@@ -2457,12 +2870,19 @@
       const min = CONFIG.MIN_PLAYERS_TO_START;
       $('btnStart').hidden = !me.is_host;
       $('btnStart').disabled = players.length < min;
+      // Show settings panel only to host
+      const settingsPanel = $('roomSettings');
+      if (settingsPanel) {
+        settingsPanel.hidden = !me.is_host;
+        const tog = $('togSuitRank');
+        if (tog) tog.checked = suitRankingEnabled;
+      }
       $('lobWait').textContent = me.is_host
         ? (players.length < min ? `Waiting for ${min - players.length} more player${min - players.length > 1 ? 's' : ''}…` : 'Start when everyone has joined.')
         : 'Waiting for the host to start the game…';
     }
     function updateBadge() {
-      $('playerRoom').textContent = room ? `Room ${room.code} · ${players.length} players · Round ${room.round}` : '';
+      $('playerRoom').textContent = room ? `Room ${room.code} · ${players.length}P · R${room.round}` : '';
     }
     function enterGame() {
       if (room && !(me && Array.isArray(me.hand) && me.hand_round === room.round)) return;
@@ -2515,6 +2935,11 @@
       await refreshAll();
       await dealRound(0);
     }));
+    // Suit ranking toggle — only the host can change it; it's written into the game on deal
+    const togSuitRankEl = $('togSuitRank');
+    if (togSuitRankEl) {
+      togSuitRankEl.addEventListener('change', () => { suitRankingEnabled = togSuitRankEl.checked; });
+    }
     $('btnCopyCode').addEventListener('click', () => room && copy(room.code, 'Room code copied'));
     $('btnCopyLink').addEventListener('click', () => room && copy(inviteLink(room.code), 'Invite link copied'));
     $('btnShare').addEventListener('click', () => room && navigator.share({ title: 'Join my poker room', text: `Join my poker room with code ${room.code}`, url: inviteLink(room.code) }).catch(() => {}));
