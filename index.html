@@ -572,6 +572,8 @@
     .sr span:nth-child(3) { color: #f87171; font-weight: 700; }
     .result .wait { margin-bottom: 8px; }
     @media (max-width: 768px) { .seats { top: 56px; max-width: calc(100vw - 16px); } .table-area { top: 104px; } .turn-banner { top: 10%; } }
+    .m-boot #bootHelp { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 6px; }
+    .m-boot #bootHelp p { font-size: 0.78rem; color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -682,7 +684,9 @@
     <div class="menu-shade"></div>
 
     <main class="menu-stage">
-      <section class="m-card m-boot" id="scBoot"><div class="spinner"></div><p>Reconnecting to your room…</p></section>
+      <section class="m-card m-boot" id="scBoot"><div class="spinner"></div><p>Reconnecting to your room…</p>
+        <div id="bootHelp" hidden><p>This is taking longer than usual.</p><button class="m-btn small" id="btnBootReset">Reset room to lobby</button><button class="m-link" id="btnBootLeave">Leave and start over</button></div>
+      </section>
 
       <section class="m-card" id="scHome" hidden>
         <h1 class="m-title">Poker</h1>
@@ -1067,8 +1071,8 @@
   (() => {
     /* ================= CONFIG ================= */
     const CONFIG = {
-      SUPABASE_URL: 'https://oxchpdysnxagpcbuueaf.supabase.co/',          // e.g. https://abcdxyz.supabase.co
-      SUPABASE_ANON_KEY: 'sb_publishable_DVufhhCiA9GWvUdmRIfdVA_KidmEBB1', // Project Settings > API > anon public key
+      SUPABASE_URL: 'YOUR_SUPABASE_URL',          // e.g. https://abcdxyz.supabase.co
+      SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY', // Project Settings > API > anon public key
       MENU_BG_URL: '',                             // optional: your own background image URL
       MAX_PLAYERS: 4,
       MIN_PLAYERS_TO_START: 2
@@ -1103,7 +1107,23 @@
       const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('room', code); return u.toString();
     }
     const screens = ['scBoot', 'scHome', 'scMode', 'scLobby'];
-    function show(id) { $('menu').classList.remove('hide'); inGame = false; screens.forEach(s => $(s).hidden = s !== id); }
+    let bootTimer = null;
+    function show(id) {
+      clearTimeout(bootTimer); $('bootHelp').hidden = true;
+      $('menu').classList.remove('hide'); inGame = false;
+      screens.forEach(s => $(s).hidden = s !== id);
+      if (id === 'scBoot') bootTimer = setTimeout(() => { $('bootHelp').hidden = false; }, 7000);
+    }
+    const withTimeout = (p, ms = 8000) => {
+      let t;
+      return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(new Error('Timed out reaching the database.')), ms); })]).finally(() => clearTimeout(t));
+    };
+    const schemaOk = r => !!r && ['round', 'scores', 'last_winner', 'game', 'ver'].every(k => k in r);
+    function showSchemaProblem() {
+      $('cfgNotice').hidden = false;
+      $('cfgNotice').textContent = 'Your Supabase tables are missing columns this version needs. Run supabase-schema.sql in the SQL Editor, then reload.';
+      show('scHome');
+    }
     async function run(btn, fn) {
       btn.disabled = true;
       try { await fn(); } catch (e) { console.error(e); toast(e.message || 'Something went wrong'); }
@@ -1188,6 +1208,7 @@
 
     /* ---------- room lifecycle ---------- */
     function enterRoom(r, p) {
+      if (!schemaOk(r)) { showSchemaProblem(); return; }
       room = r; me = p;
       store.set(LS.session, { playerId: p.id, roomId: r.id, code: r.code, name: p.name });
       try { history.replaceState(null, '', inviteLink(r.code)); } catch {}
@@ -1227,22 +1248,48 @@
     function stopTimers() { clearInterval(hbTimer); clearInterval(pollTimer); clearTimeout(refreshQ); }
     async function beat() { if (me) await sb.from('players').update({ last_seen: new Date().toISOString() }).eq('id', me.id); }
 
-    async function refreshAll() {
+    let stuck = 0, recovering = false;
+    async function refreshAll() { try { await refreshInner(); } catch (e) { console.error(e); } }
+    async function refreshInner() {
       if (!room || !me) return;
-      const [pl, rm] = await Promise.all([
+      const [pl, rm] = await withTimeout(Promise.all([
         sb.from('players').select('*').eq('room_id', room.id).order('joined_at'),
         sb.from('rooms').select('*').eq('id', room.id).maybeSingle()
-      ]);
+      ]));
       if (!room || !me || pl.error || rm.error) return;
       const mine = pl.data.find(p => p.id === me.id);
       if (!mine || !rm.data) { resetLocal(); toast('You are no longer in that room.', 'info'); show('scMode'); return; }
+      if (!schemaOk(rm.data)) { stopTimers(); unsubscribe(); room = null; me = null; players = []; showSchemaProblem(); return; }
       players = pl.data; me = mine;
       if (rm.data.ver >= room.ver) room = rm.data; // ignore stale reads
+
+      // Self-heal: a room marked "playing" with no game state or no dealt cards can never load.
+      const handOk = Array.isArray(me.hand) && me.hand_round === room.round;
+      const broken = room.status !== 'waiting' && (!room.game || (!inGame && !handOk));
+      if (broken) {
+        if (++stuck >= 3) { stuck = 0; await recover(); return; }
+        setTimeout(refreshAll, 1500);
+      } else stuck = 0;
+
       if (room.status === 'waiting' && inGame) {
         resetGameUi(); show('scLobby'); toast('The player list changed. Rounds reset to 0.', 'info');
       }
       if (room.status !== 'waiting' && !inGame) enterGame();
       if (inGame) { updateBadge(); syncGame(); } else renderLobby();
+    }
+    async function recover() {
+      if (recovering || !room) return;
+      recovering = true;
+      try {
+        const id = room.id;
+        await resetRoom(id);
+        const { data } = await sb.from('rooms').select('*').eq('id', id).maybeSingle();
+        if (data) room = data;
+        resetGameUi(); show('scLobby');
+        toast('That room was out of sync, so it was reset to the lobby.', 'info');
+      } catch (e) { console.error(e); toast('Could not reset the room. Try Leave and start over.'); }
+      finally { recovering = false; }
+      refreshAll();
     }
 
     /* ================= GAME SYNC ================= */
@@ -1403,7 +1450,7 @@
     function enterGame() {
       if (room && !(me && Array.isArray(me.hand) && me.hand_round === room.round)) return;
       inGame = true; loadedRound = null; lastKey = null; resultRound = null;
-      $('menu').classList.add('hide');
+      clearTimeout(bootTimer); $('menu').classList.add('hide');
       const n = me ? me.name : 'You';
       document.querySelector('.player-name').textContent = n;
       document.querySelector('.player-av').textContent = n[0].toUpperCase();
@@ -1454,6 +1501,10 @@
     $('btnShare').addEventListener('click', () => room && navigator.share({ title: 'Join my poker room', text: `Join my poker room with code ${room.code}`, url: inviteLink(room.code) }).catch(() => {}));
     $('btnLeaveLobby').addEventListener('click', leaveRoom);
     $('btnLeave').addEventListener('click', () => { if (confirm('Leave this room?')) leaveRoom(); });
+    $('btnBootReset').addEventListener('click', () => run($('btnBootReset'), async () => {
+      if (room) await recover(); else { store.del(LS.session); show('scHome'); }
+    }));
+    $('btnBootLeave').addEventListener('click', () => { if (room) leaveRoom(); else { store.del(LS.session); show('scHome'); } });
     document.addEventListener('visibilitychange', () => { if (!document.hidden && room) { beat(); refreshAll(); } });
 
     /* ---------- boot ---------- */
@@ -1477,15 +1528,21 @@
       const s = store.get(LS.session);
       if (s && (!urlCode || urlCode === s.code)) {
         show('scBoot');
-        const { data: p, error } = await sb.from('players').select('*').eq('id', s.playerId).maybeSingle();
-        if (error) { toast('Could not reach the server. Reload to try again.'); show('scHome'); return; }
-        if (p) {
-          const { data: r, error: e2 } = await sb.from('rooms').select('*').eq('id', p.room_id).maybeSingle();
-          if (e2) { toast('Could not reach the server. Reload to try again.'); show('scHome'); return; }
-          if (r) { $('hiName').textContent = p.name; enterRoom(r, p); return; }
+        try {
+          const { data: p, error } = await withTimeout(sb.from('players').select('*').eq('id', s.playerId).maybeSingle());
+          if (error) throw error;
+          if (p) {
+            const { data: r, error: e2 } = await withTimeout(sb.from('rooms').select('*').eq('id', p.room_id).maybeSingle());
+            if (e2) throw e2;
+            if (r) { $('hiName').textContent = p.name; enterRoom(r, p); return; }
+          }
+          store.del(LS.session);
+          toast('Your last room is no longer available.', 'info');
+        } catch (e) {
+          console.error(e);
+          toast('Could not reach the database. Check that your Supabase project is active, then reload.');
+          show('scHome'); return;
         }
-        store.del(LS.session);
-        toast('Your last room is no longer available.', 'info');
       }
       show('scHome');
       if (urlCode && $('inName').value) $('inName').focus();
