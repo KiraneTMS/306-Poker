@@ -547,6 +547,31 @@
     .pl.on .dot { background: #4ade80; box-shadow: 0 0 8px #4ade80; }
     .m-wait { text-align: center; font-size: 0.82rem; color: #9fb0c7; }
     @media (max-width: 480px) { .m-card { padding: 24px 20px; } .m-title { font-size: 3rem; } .code { font-size: 2.1rem; } }
+
+    /* ============ MULTIPLAYER ============ */
+    .seats { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 28; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 340px); pointer-events: none; }
+    .seat { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 14px; background: var(--glass), rgba(12,18,30,0.45); border: 1px solid var(--glass-border); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: var(--glass-edge), 0 6px 18px rgba(0,0,0,0.35); transition: box-shadow 0.3s, border-color 0.3s, transform 0.3s var(--ease-pop); }
+    .seat .av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; color: #0f172a; background: linear-gradient(135deg, #94a3b8, #64748b); }
+    .seat.me .av { color: #1a1200; background: linear-gradient(135deg, #f0c14a, #d4a017); }
+    .seat .si { display: flex; flex-direction: column; line-height: 1.15; }
+    .seat b { font-size: 0.78rem; }
+    .seat i { font-style: normal; font-size: 0.64rem; color: #8b9bb4; }
+    .seat.turn { border-color: rgba(240,193,74,0.6); transform: translateY(2px); animation: turnpulse 1.8s ease-in-out infinite; }
+    @keyframes turnpulse { 0%, 100% { box-shadow: var(--glass-edge), 0 0 0 1px rgba(240,193,74,0.25), 0 0 20px var(--gold-glow); } 50% { box-shadow: var(--glass-edge), 0 0 0 1px rgba(240,193,74,0.4), 0 0 32px rgba(240,193,74,0.5); } }
+    .turn-banner { position: absolute; top: 12%; left: 50%; transform: translateX(-50%); z-index: 6; padding: 5px 14px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; color: #cbd5e1; white-space: nowrap; background: var(--glass), rgba(12,18,30,0.5); border: 1px solid var(--glass-border); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+    .turn-banner.mine { color: #1a1200; background: linear-gradient(180deg, #f6d36b, #d4a017); border-color: rgba(255,255,255,0.4); box-shadow: 0 0 20px var(--gold-glow); }
+    body.mp.waiting .remain-cards .card { filter: brightness(0.82) saturate(0.8); }
+    body.mp.waiting .remain-cards .card:hover { transform: none; box-shadow: 0 3px 10px rgba(0,0,0,0.4); }
+    .result { max-width: 340px; }
+    .result .rd { font-size: 0.72rem; color: #8b9bb4; margin-bottom: 6px; }
+    .result h3 { font-size: 1.3rem; }
+    .result .sb { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 16px; }
+    .sr { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+    .sr.win { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.08); }
+    .sr span:nth-child(2) { color: #4ade80; font-weight: 700; }
+    .sr span:nth-child(3) { color: #f87171; font-weight: 700; }
+    .result .wait { margin-bottom: 8px; }
+    @media (max-width: 768px) { .seats { top: 56px; max-width: calc(100vw - 16px); } .table-area { top: 104px; } .turn-banner { top: 10%; } }
   </style>
 </head>
 <body>
@@ -579,6 +604,7 @@
   <div class="table-area">
     <div class="table">
       <div class="table-label">Currently Played</div>
+      <div class="turn-banner" id="turnBanner" hidden></div>
       <div class="play-zone" id="playZone"><div class="play-empty">No cards played yet</div></div>
       <div class="auto-pass" id="autoPass">Auto pass in <span id="autoSec">3</span>s</div>
       <div class="action-btns">
@@ -612,6 +638,9 @@
       </div>
     </div>
   </div>
+
+  <div class="seats" id="seats"></div>
+  <div class="modal-overlay" id="resultOverlay"><div class="modal result" id="resultBox"></div></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
@@ -699,11 +728,11 @@
       S: { symbol: '♠', color: 'black' },
       C: { symbol: '♣', color: 'black' }
     };
-    const RANK_ORDER = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+    const RANK_ORDER = ['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
     const SUIT_PRIORITY = { S: 4, H: 3, C: 2, D: 1 };
 
-    let remaining = ['AH','AD','AS','KH','QD','JH','10S','9C','8S','7H','6D','5C','3S'];
-    let playedCards = ['5C'];
+    let remaining = [];
+    let playedCards = [];
     let playedType = 'single';
     let autoPassTimer = null;
     let round = 0, lastRoundWinner = null, scores = {}, players = ['You'], currentTurnPlayer = 'You';
@@ -716,6 +745,19 @@
       return { rank, suit: suitKey, ...suits[suitKey], code };
     }
     function rankValue(r) { return RANK_ORDER.indexOf(r); }
+
+    // ---- deck: 52 cards, unbiased crypto Fisher-Yates shuffle ----
+    function buildDeck() { const d = []; RANK_ORDER.forEach(r => Object.keys(suits).forEach(s => d.push(r + s))); return d; }
+    function randInt(n) {
+      const lim = Math.floor(0x100000000 / n) * n, a = new Uint32Array(1);
+      do { crypto.getRandomValues(a); } while (a[0] >= lim);
+      return a[0] % n;
+    }
+    function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+    function sortHand(h) {
+      return h.slice().sort((x, y) => { const a = parseCard(x), b = parseCard(y); return rankValue(b.rank) - rankValue(a.rank) || SUIT_PRIORITY[b.suit] - SUIT_PRIORITY[a.suit]; });
+    }
+    function dealHands(count) { const deck = shuffle(buildDeck()); return Array.from({ length: count }, (_, i) => sortHand(deck.slice(i * 13, i * 13 + 13))); }
 
     function createLargeCard(code) {
       const { rank, symbol, color } = parseCard(code);
@@ -751,11 +793,11 @@
       if (codes.length === 4 && ranks.length === 1) return 'bomb';
       if (codes.length === 4 && ranks.length === 2 && counts.every(c => c === 2)) {
         const sorted = ranks.sort((a,b) => rankValue(a)-rankValue(b));
-        if (rankValue(sorted[1])-rankValue(sorted[0]) === 1) return 'brother';
+        if (rankValue(sorted[1])-rankValue(sorted[0]) === 1 && !sorted.includes('2')) return 'brother';
       }
       if (codes.length === 5) {
         const unique = [...new Set(parsed.map(c => c.rank))];
-        if (unique.length === 5) {
+        if (unique.length === 5 && !unique.includes('2')) {
           unique.sort((a,b) => rankValue(a)-rankValue(b));
           let ok = true;
           for (let i = 1; i < 5; i++) if (rankValue(unique[i])-rankValue(unique[i-1]) !== 1) { ok = false; break; }
@@ -774,6 +816,7 @@
           return { ok: true, isBombEnd: true };
         return { ok: false, reason: 'Bomb only beats a single 2' };
       }
+      if (playedCards.length === 0) return { ok: true };
       if (playedType === 'single' && newType !== 'single')
         return { ok: false, reason: 'Only single can beat a single (or Bomb on 2)' };
       if (playedType === 'pair' && newType !== 'pair')
@@ -786,8 +829,9 @@
         return { ok: false, reason: `Only ${playedType} can beat this` };
       if (playedType === 'bomb')
         return { ok: false, reason: 'Bomb already ended the match' };
-      const newMax = Math.max(...newCodes.map(c => rankValue(parseCard(c).rank)));
-      const playedMax = Math.max(...playedCards.map(c => rankValue(parseCard(c).rank)));
+      const strength = c => { const k = parseCard(c); return rankValue(k.rank) * 10 + SUIT_PRIORITY[k.suit]; };
+      const newMax = Math.max(...newCodes.map(strength));
+      const playedMax = Math.max(...playedCards.map(strength));
       if (newMax <= playedMax) return { ok: false, reason: 'Must be higher than current played' };
       return { ok: true };
     }
@@ -823,13 +867,13 @@
       pairRanks.sort((a,b) => rankIdx(a)-rankIdx(b));
       for (let i = 0; i < pairRanks.length-1; i++) {
         const r1 = pairRanks[i], r2 = pairRanks[i+1];
-        if (rankIdx(r2)-rankIdx(r1) === 1) {
+        if (rankIdx(r2)-rankIdx(r1) === 1 && r2 !== '2') {
           sets.push({ type:'Brother', tag:'brother', className:'brother',
             cards:[...byRank[r1].slice(0,2).map(c=>c.code), ...byRank[r2].slice(0,2).map(c=>c.code)],
             label:`Brother ${r1}${r2}` });
         }
       }
-      const uniqueRanks = [...new Set(parsed.map(c => c.rank))].sort((a,b)=>rankIdx(a)-rankIdx(b));
+      const uniqueRanks = [...new Set(parsed.map(c => c.rank).filter(r => r !== '2'))].sort((a,b)=>rankIdx(a)-rankIdx(b));
       for (let i = 0; i <= uniqueRanks.length-5; i++) {
         const slice = uniqueRanks.slice(i, i+5);
         let ok = true;
@@ -867,6 +911,7 @@
         </div>`).join('');
       container.querySelectorAll('.hitem').forEach(item => {
         item.addEventListener('click', () => {
+          if (window.MP && MP.active() && !MP.myTurn()) return;
           const codes = JSON.parse(item.dataset.cards);
           selected.clear();
           document.querySelectorAll('.remain-cards .card').forEach(c => c.classList.remove('selected'));
@@ -909,6 +954,7 @@
 
     const selected = new Set();
     function toggleSelect(cardEl) {
+      if (window.MP && MP.active() && !MP.myTurn()) { showToast('Wait for your turn', 'info'); return; }
       const code = cardEl.dataset.code;
       if (selected.has(code)) { selected.delete(code); cardEl.classList.remove('selected'); }
       else { selected.add(code); cardEl.classList.add('selected'); }
@@ -926,6 +972,7 @@
     }
 
     function doPass() {
+      if (window.MP && MP.active()) { MP.pass(); return; }
       selected.clear();
       document.querySelectorAll('.remain-cards .card').forEach(c => c.classList.remove('selected'));
       clearAutoPass();
@@ -938,7 +985,7 @@
     }
     function checkAutoPass() {
       clearAutoPass();
-      if (!hasLegalMove() && playedCards.length > 0) {
+      if ((!window.MP || !MP.active() || MP.myTurn()) && !hasLegalMove() && playedCards.length > 0) {
         document.getElementById('btnDraw').disabled = true;
         let sec = 3;
         document.getElementById('autoSec').textContent = sec;
@@ -946,10 +993,10 @@
         autoPassTimer = setInterval(() => {
           sec--;
           document.getElementById('autoSec').textContent = sec;
-          if (sec <= 0) { clearAutoPass(); doPass(); document.getElementById('btnDraw').disabled = false; }
+          if (sec <= 0) { clearAutoPass(); doPass(); if (window.MP && MP.active()) MP.controls(); else document.getElementById('btnDraw').disabled = false; }
         }, 1000);
       } else {
-        document.getElementById('btnDraw').disabled = false;
+        if (window.MP && MP.active()) MP.controls(); else document.getElementById('btnDraw').disabled = false;
       }
     }
 
@@ -960,6 +1007,7 @@
       if (!type) { showToast('Invalid set'); return; }
       const result = canBeat(codes);
       if (!result.ok) { showToast(result.reason); return; }
+      if (window.MP && MP.active()) { MP.play(codes, type, !!result.isBombEnd); return; }
       if (result.isBombEnd) {
         playedCards = codes; playedType = type;
         remaining = remaining.filter(c => !selected.has(c));
@@ -979,6 +1027,7 @@
     document.getElementById('modalCancel').addEventListener('click', () => document.getElementById('modal').classList.remove('show'));
     document.getElementById('modalConfirm').addEventListener('click', () => {
       document.getElementById('modal').classList.remove('show');
+      if (window.MP && MP.active()) { MP.giveUp(); return; }
       remaining = []; selected.clear(); clearAutoPass();
       renderRemaining(); showToast('You gave up', 'info');
     });
@@ -1018,11 +1067,11 @@
   (() => {
     /* ================= CONFIG ================= */
     const CONFIG = {
-      SUPABASE_URL: 'https://oxchpdysnxagpcbuueaf.supabase.co',          // e.g. https://abcdxyz.supabase.co
+      SUPABASE_URL: 'https://oxchpdysnxagpcbuueaf.supabase.co/',          // e.g. https://abcdxyz.supabase.co
       SUPABASE_ANON_KEY: 'sb_publishable_DVufhhCiA9GWvUdmRIfdVA_KidmEBB1', // Project Settings > API > anon public key
       MENU_BG_URL: '',                             // optional: your own background image URL
       MAX_PLAYERS: 4,
-      MIN_PLAYERS_TO_START: 1                      // raise to 2 once multiplayer turns are built
+      MIN_PLAYERS_TO_START: 2
     };
 
     const $ = id => document.getElementById(id);
@@ -1037,12 +1086,14 @@
       del(k) { try { localStorage.removeItem(k); } catch {} }
     };
 
-    let me = null, room = null, players = [], channel = null, hbTimer = null, pollTimer = null, refreshQ = null, inGame = false;
+    let me = null, room = null, players = [], channel = null, hbTimer = null, pollTimer = null, refreshQ = null;
+    let inGame = false, acting = false, loadedRound = null, lastKey = null, resultRound = null;
     const seen = new Set();
 
     /* ---------- helpers ---------- */
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const cleanName = v => v.replace(/\s+/g, ' ').trim().slice(0, 16);
+    const nameOf = id => (players.find(p => p.id === id) || { name: 'Player' }).name;
     function genCode() {
       const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c = '';
       crypto.getRandomValues(new Uint8Array(5)).forEach(b => c += a[b % a.length]);
@@ -1064,7 +1115,40 @@
       toast(okMsg, 'info');
     }
 
-    /* ---------- Supabase operations ---------- */
+    /* ================= ROUND / TURN RULES (pure helpers) ================= */
+    // Round 0 first turn: most 3s wins; tie -> the 3 with the highest suit (S > H > C > D).
+    // If nobody holds a 3 (fewer than 4 players), fall through 4s, 5s ... in the same way.
+    function pickFirstTurn(handsById, order) {
+      const ranks = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
+      for (const r of ranks) {
+        let best = null;
+        for (const id of order) {
+          const held = (handsById[id] || []).filter(c => parseCard(c).rank === r);
+          if (!held.length) continue;
+          const top = Math.max(...held.map(c => SUIT_PRIORITY[parseCard(c).suit]));
+          if (!best || held.length > best.n || (held.length === best.n && top > best.top)) best = { id, n: held.length, top };
+        }
+        if (best) return best.id;
+      }
+      return order[0];
+    }
+    // Next player in seat order who has not passed in this trick.
+    function nextTurn(game, fromId) {
+      const o = game.order, i = o.indexOf(fromId);
+      for (let k = 1; k <= o.length; k++) {
+        const id = o[(i + k) % o.length];
+        if (!(game.passed || []).includes(id)) return id;
+      }
+      return fromId;
+    }
+    const emptyGame = (order, turn) => ({ order, turn, table: null, passed: [], winner: null, loser: null, bomb: false });
+
+    /* ---------- Supabase: room membership ---------- */
+    async function resetRoom(roomId) {
+      // Round back to 0, scores cleared, everyone returns to the lobby.
+      await sb.from('players').update({ hand: null, hand_round: null }).eq('room_id', roomId);
+      await sb.from('rooms').update({ status: 'waiting', round: 0, scores: {}, last_winner: null, game: null, ver: Date.now() }).eq('id', roomId);
+    }
     async function createRoom(name) {
       let r = null;
       for (let i = 0; i < 6 && !r; i++) {
@@ -1080,20 +1164,21 @@
       const { data: r, error } = await sb.from('rooms').select('*').eq('code', code).maybeSingle();
       if (error) throw error;
       if (!r) throw new Error('Room not found. Check the code and try again.');
-      if (r.status !== 'waiting') throw new Error('That game has already started.');
       const { count, error: e1 } = await sb.from('players').select('id', { count: 'exact', head: true }).eq('room_id', r.id);
       if (e1) throw e1;
       if (count >= r.max_players) throw new Error('That room is full.');
       const { data: p, error: e2 } = await sb.from('players').insert({ room_id: r.id, name, is_host: false }).select().single();
       if (e2) throw e2.code === '23505' ? new Error('That name is taken in this room. Pick another.') : e2;
+      if (r.status !== 'waiting' || r.round) { await resetRoom(r.id); r.status = 'waiting'; r.round = 0; r.game = null; r.scores = {}; }
       return { room: r, me: p };
     }
     async function removePlayer(roomId, playerId) {
       try {
         await sb.from('players').delete().eq('id', playerId);
         const { data } = await sb.from('players').select('*').eq('room_id', roomId).order('joined_at');
-        if (!data || !data.length) await sb.from('rooms').delete().eq('id', roomId);
-        else if (!data.some(p => p.is_host)) await sb.from('players').update({ is_host: true }).eq('id', data[0].id);
+        if (!data || !data.length) { await sb.from('rooms').delete().eq('id', roomId); return; }
+        if (!data.some(p => p.is_host)) await sb.from('players').update({ is_host: true }).eq('id', data[0].id);
+        await resetRoom(roomId); // a player left: round resets to 0
       } catch (e) { console.warn(e); }
     }
     async function dropOldSession() {
@@ -1107,11 +1192,17 @@
       store.set(LS.session, { playerId: p.id, roomId: r.id, code: r.code, name: p.name });
       try { history.replaceState(null, '', inviteLink(r.code)); } catch {}
       subscribe(); startTimers();
-      if (r.status === 'playing') enterGame();
-      else { show('scLobby'); refreshAll(); }
+      show(r.status === 'waiting' ? 'scLobby' : 'scBoot');
+      refreshAll();
+    }
+    function resetGameUi() {
+      loadedRound = null; lastKey = null; resultRound = null;
+      $('resultOverlay').classList.remove('show'); $('seats').innerHTML = ''; $('turnBanner').hidden = true;
+      document.body.classList.remove('mp', 'waiting');
+      document.querySelector('.table-label').textContent = 'Currently Played';
     }
     function resetLocal() {
-      stopTimers(); unsubscribe(); store.del(LS.session); seen.clear();
+      stopTimers(); unsubscribe(); store.del(LS.session); seen.clear(); resetGameUi();
       room = null; me = null; players = [];
       try { const u = new URL(location.href); u.search = ''; history.replaceState(null, '', u.toString()); } catch {}
     }
@@ -1131,31 +1222,162 @@
         .subscribe();
     }
     function unsubscribe() { if (channel) { sb.removeChannel(channel); channel = null; } }
-    function queueRefresh() { clearTimeout(refreshQ); refreshQ = setTimeout(refreshAll, 150); }
-    function startTimers() {
-      stopTimers(); beat();
-      hbTimer = setInterval(beat, 15000);
-      pollTimer = setInterval(refreshAll, 8000);
-    }
+    function queueRefresh() { clearTimeout(refreshQ); refreshQ = setTimeout(refreshAll, 120); }
+    function startTimers() { stopTimers(); beat(); hbTimer = setInterval(beat, 15000); pollTimer = setInterval(refreshAll, 8000); }
     function stopTimers() { clearInterval(hbTimer); clearInterval(pollTimer); clearTimeout(refreshQ); }
-    async function beat() {
-      if (me) await sb.from('players').update({ last_seen: new Date().toISOString() }).eq('id', me.id);
-    }
+    async function beat() { if (me) await sb.from('players').update({ last_seen: new Date().toISOString() }).eq('id', me.id); }
+
     async function refreshAll() {
       if (!room || !me) return;
       const [pl, rm] = await Promise.all([
         sb.from('players').select('*').eq('room_id', room.id).order('joined_at'),
         sb.from('rooms').select('*').eq('id', room.id).maybeSingle()
       ]);
-      if (pl.error || rm.error) return;
+      if (!room || !me || pl.error || rm.error) return;
       const mine = pl.data.find(p => p.id === me.id);
       if (!mine || !rm.data) { resetLocal(); toast('You are no longer in that room.', 'info'); show('scMode'); return; }
-      players = pl.data; me = mine; room = rm.data;
-      if (room.status === 'playing' && !inGame) enterGame();
-      renderLobby(); updateBadge();
+      players = pl.data; me = mine;
+      if (rm.data.ver >= room.ver) room = rm.data; // ignore stale reads
+      if (room.status === 'waiting' && inGame) {
+        resetGameUi(); show('scLobby'); toast('The player list changed. Rounds reset to 0.', 'info');
+      }
+      if (room.status !== 'waiting' && !inGame) enterGame();
+      if (inGame) { updateBadge(); syncGame(); } else renderLobby();
     }
 
-    /* ---------- rendering ---------- */
+    /* ================= GAME SYNC ================= */
+    const cnt = p => p.id === me.id ? remaining.length : (Array.isArray(p.hand) ? p.hand.length : 99);
+
+    async function pushGame(patch) {
+      const { data, error } = await sb.from('rooms').update({ ...patch, ver: room.ver + 1 }).eq('id', room.id).eq('ver', room.ver).select().maybeSingle();
+      if (error) throw error;
+      if (!data) { await refreshAll(); throw new Error('The table just changed. Try again.'); }
+      room = data; return data;
+    }
+    async function saveHand(hand) {
+      me.hand = hand;
+      const mp = players.find(p => p.id === me.id); if (mp) mp.hand = hand;
+      const { error } = await sb.from('players').update({ hand }).eq('id', me.id);
+      if (error) throw error;
+    }
+    // Deal a round. round 0 = fresh game (scores cleared). Later rounds keep scores.
+    async function dealRound(round) {
+      if (players.length < CONFIG.MIN_PLAYERS_TO_START) throw new Error(`Need at least ${CONFIG.MIN_PLAYERS_TO_START} players.`);
+      const hands = dealHands(players.length), byId = {}, order = players.map(p => p.id);
+      order.forEach((id, i) => byId[id] = hands[i]);
+      const lw = room.last_winner;
+      const first = round > 0 && lw && order.includes(lw) ? lw : pickFirstTurn(byId, order);
+      const res = await Promise.all(players.map(p => sb.from('players').update({ hand: byId[p.id], hand_round: round }).eq('id', p.id)));
+      const bad = res.find(r => r.error); if (bad) throw bad.error;
+      await pushGame({ status: 'playing', round, game: emptyGame(order, first), scores: round === 0 ? {} : (room.scores || {}), last_winner: round === 0 ? null : lw });
+      me.hand = byId[me.id]; me.hand_round = round;
+      if (!inGame) enterGame(); else syncGame();
+    }
+    async function finishMatch({ winner, loser, bomb = false, game, newHand }) {
+      const scores = JSON.parse(JSON.stringify(room.scores || {}));
+      [winner, loser].forEach(id => { scores[id] = scores[id] || { w: 0, l: 0 }; });
+      scores[winner].w++; if (loser !== winner) scores[loser].l++;
+      await pushGame({ status: 'finished', game: { ...game, winner, loser, bomb, turn: null }, scores, last_winner: winner });
+      if (newHand) { await saveHand(newHand); remaining = newHand; selected.clear(); renderRemaining(); }
+      syncGame();
+    }
+    async function mpAct(fn) {
+      if (acting) return; acting = true;
+      try { await fn(); } catch (e) { console.error(e); toast(e.message || 'Something went wrong'); }
+      finally { acting = false; }
+    }
+    const clearSel = () => { selected.clear(); document.querySelectorAll('.remain-cards .card.selected').forEach(c => c.classList.remove('selected')); };
+
+    window.MP = {
+      active: () => !!room && inGame,
+      myTurn: () => !!(room && room.game && !room.game.winner && me && room.game.turn === me.id),
+      controls: () => updateControls(),
+      play: (codes, type, isBomb) => mpAct(async () => {
+        const G = room.game;
+        if (!G || G.winner || G.turn !== me.id) { toast('Not your turn', 'info'); return; }
+        const newHand = remaining.filter(c => !codes.includes(c));
+        const game = { ...G, table: { cards: codes, type, by: me.id }, passed: [] };
+        if (isBomb) { await finishMatch({ winner: me.id, loser: G.table.by, bomb: true, game, newHand }); return; }
+        if (!newHand.length) {
+          const others = G.order.map(id => players.find(p => p.id === id)).filter(p => p && p.id !== me.id);
+          const loser = others.reduce((a, b) => cnt(b) > cnt(a) ? b : a, others[0]);
+          await finishMatch({ winner: me.id, loser: loser.id, game, newHand }); return;
+        }
+        game.turn = nextTurn(game, me.id);
+        await pushGame({ game });
+        await saveHand(newHand); remaining = newHand; clearSel(); renderRemaining(); syncGame();
+      }),
+      pass: () => mpAct(async () => {
+        const G = room.game;
+        if (!G || G.winner || G.turn !== me.id) return;
+        if (!G.table) { toast('You lead. Play any set.', 'info'); return; }
+        const passed = [...G.passed, me.id];
+        let game = { ...G, passed };
+        if (G.order.filter(id => !passed.includes(id)).length <= 1) game = { ...game, table: null, passed: [], turn: G.table.by };
+        else game.turn = nextTurn(game, me.id);
+        await pushGame({ game });
+        clearSel(); toast('Passed', 'info'); syncGame();
+      }),
+      giveUp: () => mpAct(async () => {
+        const G = room.game; if (!G || G.winner) return;
+        const others = players.filter(p => p.id !== me.id);
+        const w = others.reduce((a, b) => cnt(b) < cnt(a) ? b : a, others[0]);
+        await finishMatch({ winner: w.id, loser: me.id, game: G });
+      })
+    };
+
+    /* ---------- game rendering ---------- */
+    function renderSeats() {
+      const G = room && room.game; if (!G) { $('seats').innerHTML = ''; return; }
+      $('seats').innerHTML = G.order.map(id => players.find(p => p.id === id)).filter(Boolean).map(p => {
+        const n = cnt(p), turn = !G.winner && G.turn === p.id, passed = (G.passed || []).includes(p.id);
+        return `<div class="seat${turn ? ' turn' : ''}${p.id === me.id ? ' me' : ''}"><span class="av">${esc(p.name[0].toUpperCase())}</span><span class="si"><b>${esc(p.name)}</b><i>${n === 99 ? '?' : n} card${n === 1 ? '' : 's'}${passed ? ' · passed' : ''}</i></span></div>`;
+      }).join('');
+    }
+    function updateControls() {
+      const G = room && room.game, mine = !!(G && !G.winner && me && G.turn === me.id);
+      document.body.classList.toggle('waiting', !mine);
+      $('btnDraw').disabled = !mine;
+      $('btnPass').disabled = !mine || !G.table;
+      const b = $('turnBanner');
+      if (!G || G.winner) { b.hidden = true; return; }
+      b.hidden = false; b.classList.toggle('mine', mine);
+      b.textContent = mine ? (G.table ? 'Your turn' : 'Your turn · lead any set') : `${nameOf(G.turn)}'s turn`;
+      document.querySelector('.table-label').textContent = G.table ? `${nameOf(G.table.by)} played` : 'Table is clear';
+    }
+    function showResult() {
+      const G = room.game, iLose = G.loser === me.id;
+      const rows = players.map(p => { const s = (room.scores || {})[p.id] || { w: 0, l: 0 }; return `<div class="sr${p.id === G.winner ? ' win' : ''}"><span>${esc(p.name)}${p.id === me.id ? ' (you)' : ''}</span><span>${s.w}W</span><span>${s.l}L</span></div>`; }).join('');
+      $('resultBox').innerHTML = `<div class="rd">Round ${room.round}</div><h3>${G.bomb ? 'Bomb! ' : ''}${esc(nameOf(G.winner))} wins</h3><p>${esc(nameOf(G.loser))} lost this round.</p><div class="sb">${rows}</div>`
+        + (iLose ? '<button class="btn btn-draw" id="btnNextRound">Deal next round</button>' : `<p class="wait">Waiting for ${esc(nameOf(G.loser))} to deal the next round…</p>`)
+        + (me.is_host && !iLose ? '<button class="m-link" id="btnForceDeal">Deal instead</button>' : '')
+        + '<button class="m-link" id="btnResultLeave">Leave room</button>';
+      $('resultOverlay').classList.add('show');
+      const deal = b => b && b.addEventListener('click', () => mpAct(async () => { await refreshAll(); await dealRound(room.round + 1); }));
+      deal($('btnNextRound')); deal($('btnForceDeal'));
+      $('btnResultLeave').addEventListener('click', leaveRoom);
+    }
+    function syncGame() {
+      if (!room || !inGame || !room.game) return;
+      const G = room.game;
+      if (loadedRound !== room.round) {
+        if (!(Array.isArray(me.hand) && me.hand_round === room.round)) return; // cards not dealt yet; next refresh retries
+        loadedRound = room.round; lastKey = null; resultRound = null;
+        $('resultOverlay').classList.remove('show');
+        remaining = me.hand.slice(); playedCards = []; selected.clear(); firstDeal = true;
+        renderRemaining();
+      }
+      renderSeats();
+      const key = JSON.stringify([G.turn, G.table, G.passed, G.winner, room.round]);
+      if (key === lastKey) return;
+      lastKey = key;
+      clearSel();
+      playedCards = G.table ? G.table.cards.slice() : [];
+      playedType = G.table ? G.table.type : 'single';
+      renderPlayed(); updateControls(); checkAutoPass();
+      if (G.winner) { if (resultRound !== room.round) { resultRound = room.round; showResult(); } }
+      else $('resultOverlay').classList.remove('show');
+    }
     function renderLobby() {
       if (!room || inGame) return;
       $('lobCode').textContent = room.code;
@@ -1176,17 +1398,23 @@
         : 'Waiting for the host to start the game…';
     }
     function updateBadge() {
-      $('playerRoom').textContent = room ? `Room ${room.code} · ${players.length} player${players.length === 1 ? '' : 's'}` : '';
+      $('playerRoom').textContent = room ? `Room ${room.code} · ${players.length} players · Round ${room.round}` : '';
     }
     function enterGame() {
-      inGame = true;
+      if (room && !(me && Array.isArray(me.hand) && me.hand_round === room.round)) return;
+      inGame = true; loadedRound = null; lastKey = null; resultRound = null;
       $('menu').classList.add('hide');
       const n = me ? me.name : 'You';
       document.querySelector('.player-name').textContent = n;
       document.querySelector('.player-av').textContent = n[0].toUpperCase();
       $('btnLeave').hidden = !room;
-      updateBadge();
-      firstDeal = true; renderRemaining(); renderPlayed();
+      document.body.classList.toggle('mp', !!room);
+      if (room) { updateBadge(); syncGame(); }
+      else {
+        document.body.classList.remove('waiting'); $('playerRoom').textContent = '';
+        remaining = dealHands(1)[0]; playedCards = []; selected.clear(); firstDeal = true;
+        renderRemaining(); renderPlayed();
+      }
     }
 
     /* ---------- events ---------- */
@@ -1218,9 +1446,8 @@
       enterRoom(res.room, res.me);
     }));
     $('btnStart').addEventListener('click', () => run($('btnStart'), async () => {
-      const { error } = await sb.from('rooms').update({ status: 'playing' }).eq('id', room.id);
-      if (error) throw error;
-      room.status = 'playing'; enterGame();
+      await refreshAll();
+      await dealRound(0);
     }));
     $('btnCopyCode').addEventListener('click', () => room && copy(room.code, 'Room code copied'));
     $('btnCopyLink').addEventListener('click', () => room && copy(inviteLink(room.code), 'Invite link copied'));
